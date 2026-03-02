@@ -1,0 +1,25 @@
+{% extends 'base.html' %}
+
+{% block title %}لوحة تحكم المعلم{% endblock %}
+
+{% block content %}
+<div class="mb-6">
+    <h1 class="text-3xl font-bold text-gray-800">أهلاً بك، أ. {{ user.get_full_name|default:user.username }}</h1>
+    <p class="text-gray-600 mt-2">إليك ملخص سريع لأهم الإحصائيات والأحداث اليومية.</p>
+</div>
+
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+    <!-- البطاقات الإحصائية (سيتم تغذيتها بالبيانات الفعلية في الخطوة 3) -->
+    <div class="bg-white rounded-xl shadow p-6 border-r-4 border-indigo-500">
+        <h3 class="text-gray-500 font-semibold mb-1">الفصول التي أدرسها</h3>
+        <p class="text-3xl font-bold text-gray-800">-</p>
+    </div>
+    
+    <div class="bg-white rounded-xl shadow p-6 border-r-4 border-green-500">
+        <h3 class="text-gray-500 font-semibold mb-1">واجبات قيد التقييم</h3>
+        <p class="text-3xl font-bold text-gray-800">-</p>
+    </div>
+
+    <!-- بطاقات إضافية -->
+</div>
+{% endblock %}

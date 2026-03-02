@@ -1,0 +1,61 @@
+{% extends 'base.html' %}
+
+{% block title %}لوحة تحكم الإدارة{% endblock %}
+
+{% block content %}
+<div class="mb-6">
+    <h1 class="text-3xl font-bold text-gray-800">لوحة تحكم النظام (Admin)</h1>
+    <p class="text-gray-600 mt-2">مرحباً بك أستاذ {{ user.username }}. من هنا يمكنك إدارة النظام بشكل كامل.</p>
+</div>
+
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+    <div class="bg-white rounded-xl shadow p-6 border-r-4 border-emerald-500">
+        <h3 class="text-gray-500 font-semibold mb-1">إجمالي الطلاب</h3>
+        <p class="text-3xl font-bold text-gray-800">{{ students_count }}</p>
+    </div>
+
+    <div class="bg-white rounded-xl shadow p-6 border-r-4 border-sky-500">
+        <h3 class="text-gray-500 font-semibold mb-1">إجمالي المعلمين</h3>
+        <p class="text-3xl font-bold text-gray-800">{{ teachers_count }}</p>
+    </div>
+</div>
+
+<!-- أزرار الإجراءات السريعة للمستخدمين -->
+<div class="bg-white rounded-xl shadow p-6 mb-8">
+    <h2 class="text-xl font-bold text-gray-800 mb-4">إضافة أشخاص</h2>
+    <div class="flex flex-wrap gap-4">
+        <a href="{% url 'admin_add_student' %}" class="bg-indigo-600 text-white px-6 py-2 rounded-lg hover:bg-indigo-700 transition">
+            + إضافة طالب جديد
+        </a>
+        <a href="{% url 'admin_add_teacher' %}" class="bg-emerald-600 text-white px-6 py-2 rounded-lg hover:bg-emerald-700 transition">
+            + إضافة معلم جديد
+        </a>
+    </div>
+</div>
+
+<!-- أزرار الإجراءات السريعة للمنظومة -->
+<div class="bg-white rounded-xl shadow p-6 mb-8">
+    <h2 class="text-xl font-bold text-gray-800 mb-4">إدارة المنظومة الأكاديمية</h2>
+    <div class="flex flex-wrap gap-4">
+        <a href="{% url 'admin_add_grade' %}" class="bg-amber-500 text-white px-6 py-2 rounded-lg hover:bg-amber-600 transition">
+            + إضافة صف
+        </a>
+        <a href="{% url 'admin_add_section' %}" class="bg-amber-500 text-white px-6 py-2 rounded-lg hover:bg-amber-600 transition">
+            + إضافة شعبة
+        </a>
+        <a href="{% url 'admin_add_subject' %}" class="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition">
+            + إضافة مادة
+        </a>
+        <a href="{% url 'admin_schedule_view' %}" class="bg-rose-500 text-white px-6 py-2 rounded-lg hover:bg-rose-600 transition">
+            إدارة جداول الحصص
+        </a>
+    </div>
+</div>
+
+<!-- إدارة قواعد البيانات العامة -->
+<div class="mt-4">
+     <a href="/admin/" target="_blank" class="bg-gray-800 text-white px-6 py-2 rounded-lg hover:bg-gray-900 transition inline-block">
+            إدارة قواعد البيانات كاملة (Django Admin)
+     </a>
+</div>
+{% endblock %}

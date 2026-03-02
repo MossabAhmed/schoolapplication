@@ -1,0 +1,8 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+    direction: rtl; /* ضمان اتجاه اليمين لليسار في كل مكان */
+    text-align: right;
+}
