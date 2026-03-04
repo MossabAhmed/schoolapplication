@@ -1,0 +1,119 @@
+<div x-data="{ tab: 'new' }">
+    <!-- Tabs Header -->
+    <div class="border-b border-gray-200 mb-6">
+        <nav class="-mb-px flex space-x-8 space-x-reverse" aria-label="Tabs">
+            <button @click="tab = 'new'"
+                    :class="tab === 'new' ? 'border-amber-500 text-amber-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'"
+                    class="whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm transition-colors">
+                إدخال درجات جديدة
+            </button>
+            <button @click="tab = 'history'"
+                    :class="tab === 'history' ? 'border-amber-500 text-amber-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'"
+                    class="whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm transition-colors">
+                سجل التقييمات السابقة
+            </button>
+        </nav>
+    </div>
+
+    <!-- New Grades Tab -->
+    <div x-show="tab === 'new'">
+        <form hx-post="{% url 'teacher_save_grades' %}" hx-swap="none" class="bg-white rounded-xl shadow overflow-hidden">
+            {% csrf_token %}
+            <input type="hidden" name="section_id" value="{{ section.id }}">
+
+            <div class="px-6 py-5 bg-amber-50 border-b border-amber-100 flex flex-col md:flex-row md:items-center justify-between gap-4">
+                <div>
+                    <h3 class="text-lg font-bold text-amber-900">إدخال تقييم جديد: {{ section.grade.name }} - {{ section.name }}</h3>
+                    <p class="text-sm text-amber-700 mt-1">يُرجى كتابة عنوان التقييم وإدخال الدرجات في الحقول أدناه.</p>
+                </div>
+                <div class="w-full md:w-auto">
+                    <input type="text" name="exam_title" required placeholder="مثال: واجب الرياضيات، الاختبار النصفي..." class="w-full md:w-72 px-4 py-2 border border-amber-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-colors bg-white">
+                </div>
+            </div>
+
+            <div class="overflow-x-auto">
+                <table class="w-full text-sm text-right text-gray-500">
+                    <thead class="text-xs text-gray-700 uppercase bg-gray-50 border-b">
+                        <tr>
+                            <th scope="col" class="px-6 py-3 w-16 text-center">#</th>
+                            <th scope="col" class="px-6 py-3 whitespace-nowrap min-w-[200px]">الطالب</th>
+                            <th scope="col" class="px-6 py-3 text-center whitespace-nowrap min-w-[120px]">رقم القيد</th>
+                            <th scope="col" class="px-6 py-3 text-center w-48 min-w-[150px]">الدرجة</th>
+                            <th scope="col" class="px-6 py-3 whitespace-nowrap min-w-[250px]">ملاحظات</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for student in students %}
+                        <tr id="new-student-{{ student.id }}" class="bg-white border-b hover:bg-gray-50 transition-colors">
+                            <td class="px-6 py-4 text-center text-gray-400 font-medium">
+                                {{ forloop.counter }}
+                            </td>
+                            <td class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap flex items-center gap-3">
+                                <div class="h-8 w-8 rounded-full bg-amber-100 flex items-center justify-center text-amber-700 font-bold p-1">
+                                    {{ student.user.first_name|first }}{{ student.user.last_name|first }}
+                                </div>
+                                <div>
+                                    <div class="font-semibold">{{ student.user.get_full_name }}</div>
+                                </div>
+                            </td>
+                            <td class="px-6 py-4 text-center font-mono text-gray-600">
+                                {{ student.user.enrollment_number|default:'-' }}
+                            </td>
+                            <td class="px-6 py-4">
+                                <input type="number" step="0.25" min="0" max="100" name="score_{{ student.id }}" placeholder="الدرجة" class="w-full text-center px-3 py-1.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500 outline-none transition-colors">
+                            </td>
+                            <td class="px-6 py-4">
+                                <input type="text" name="notes_{{ student.id }}" placeholder="إضافة ملاحظة..." class="w-full px-3 py-1.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500 outline-none transition-colors text-sm bg-gray-50 focus:bg-white">
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="5" class="px-6 py-12 text-center text-gray-500">
+                                لا يوجد طلاب في هذه الشعبة.
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            {% if students %}
+            <div class="px-6 py-4 bg-gray-50 border-t border-gray-200 flex justify-end">
+                <button type="submit" class="bg-amber-600 text-white px-6 py-2.5 rounded-lg hover:bg-amber-700 transition flex items-center gap-2 font-medium shadow">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4"></path></svg>
+                    حفظ الدرجات المعُطاة
+                </button>
+            </div>
+            {% endif %}
+        </form>
+    </div>
+
+    <!-- History Tab -->
+    <div x-show="tab === 'history'" x-cloak>
+        <div class="bg-white rounded-xl shadow overflow-hidden p-6 mb-6">
+            <h3 class="text-lg font-bold text-gray-800 mb-4">اختيار تقييم سابق للتعديل</h3>
+            
+            <div class="flex items-center gap-4">
+                <select id="exam-select" name="exam_title"
+                        hx-get="{% url 'teacher_load_exam_grades' %}?section_id={{ section.id }}"
+                        hx-target="#history-grades-container"
+                        class="w-full md:w-96 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none bg-white">
+                    <option value="" disabled selected>-- اختر التقييم/الامتحان السابق --</option>
+                    {% for exam in past_exams %}
+                        <option value="{{ exam }}">{{ exam }}</option>
+                    {% empty %}
+                        <option value="" disabled>لا توجد تقييمات سابقة مسجلة لهذه الشعبة</option>
+                    {% endfor %}
+                </select>
+                
+                {% if not past_exams %}
+                <span class="text-sm text-gray-500">سجل التقييمات فارغ لهذه الشعبة.</span>
+                {% endif %}
+            </div>
+        </div>
+
+        <div id="history-grades-container">
+            <!-- سيتم تحميل درجات التقييم السابق هنا بواسطة HTMX -->
+        </div>
+    </div>
+</div>

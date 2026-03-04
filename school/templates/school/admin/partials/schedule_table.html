@@ -1,4 +1,17 @@
-<div class="animate-fade-in-up">
+{{ teacher_subjects_map|json_script:"teacher-subjects-data" }}
+<div class="animate-fade-in-up" x-data='{ 
+    showModal: {% if show_modal or form.errors %}true{% else %}false{% endif %},
+    selectedTeacher: "{{ form.teacher.value|default:"" }}",
+    teacherSubjectsMap: JSON.parse(document.getElementById("teacher-subjects-data").textContent),
+    availableSubjects: [],
+    updateSubjects() {
+        if (this.selectedTeacher && this.teacherSubjectsMap[this.selectedTeacher]) {
+            this.availableSubjects = this.teacherSubjectsMap[this.selectedTeacher];
+        } else {
+            this.availableSubjects = [];
+        }
+    }
+}' x-init="updateSubjects()">
     <!-- رأس الصفحة: العنوان والزر -->
     <div class="mb-8 flex flex-wrap justify-between items-center bg-indigo-50 p-6 rounded-xl border border-indigo-100 shadow-sm gap-4">
         <div>
@@ -7,7 +20,7 @@
         </div>
         
         <!-- زر فتح موديول (Modal) الإضافة -->
-        <button onclick="document.getElementById('add-schedule-modal').classList.remove('hidden')" class="bg-indigo-600 text-white px-6 py-2.5 rounded-lg shadow-md hover:bg-indigo-700 hover:shadow-lg transition-all transform hover:-translate-y-0.5 text-sm font-bold flex items-center gap-2 shrink-0">
+        <button @click="showModal = true" class="bg-indigo-600 text-white px-6 py-2.5 rounded-lg shadow-md hover:bg-indigo-700 hover:shadow-lg transition-all transform hover:-translate-y-0.5 text-sm font-bold flex items-center gap-2 shrink-0">
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path></svg>
             إضافة حصة
         </button>
@@ -69,160 +82,120 @@
             </tbody>
         </table>
     </div>
-</div>
 
-<!-- موديول إضافة حصة (Modal) -->
-<div id="add-schedule-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-gray-900 bg-opacity-60 backdrop-blur-sm transition-opacity" style="z-index: 9999;">
-    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-lg mx-4 transform transition-all scale-100">
-        <div class="flex justify-between items-center p-5 border-b border-gray-100 bg-gray-50 rounded-t-2xl">
-            <h3 class="text-xl font-bold text-gray-800">إضافة حصة جديدة</h3>
-            <button onclick="document.getElementById('add-schedule-modal').classList.add('hidden')" class="text-gray-400 hover:text-red-500 transition-colors p-1 rounded-full hover:bg-gray-200">
-                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
-            </button>
-        </div>
+    <!-- موديول إضافة حصة (Modal) -->
+    <div x-show="showModal" 
+         style="display: none;"
+         class="fixed inset-0 z-[9999] flex items-center justify-center overflow-y-auto overflow-x-hidden p-4 sm:p-6"
+         x-transition:enter="transition ease-out duration-300"
+         x-transition:enter-start="opacity-0"
+         x-transition:enter-end="opacity-100"
+         x-transition:leave="transition ease-in duration-200"
+         x-transition:leave-start="opacity-100"
+         x-transition:leave-end="opacity-0">
         
-        <div class="p-6">
-            <form method="post" action="{% url 'admin_schedule_view' %}">
-                {% csrf_token %}
-                <input type="hidden" name="section" value="{{ section_id }}">
+        <!-- الخلفية الشفافة -->
+        <div class="fixed inset-0 transition-opacity" @click="showModal = false">
+            <div class="absolute inset-0 bg-gray-900 opacity-75"></div>
+        </div>
+
+        <!-- محتوى المودال -->
+            <div class="relative z-10 bg-white rounded-2xl shadow-2xl transform transition-all sm:max-w-lg sm:w-full"
+                 x-show="showModal"
+                 x-transition:enter="transition ease-out duration-300"
+                 x-transition:enter-start="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
+                 x-transition:enter-end="opacity-100 translate-y-0 sm:scale-100"
+                 x-transition:leave="transition ease-in duration-200"
+                 x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100"
+                 x-transition:leave-end="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95">
                 
-                <div class="space-y-5">
-                    <!-- اختيار المعلم -->
-                    <div>
-                        <label class="block text-sm font-semibold text-gray-700 mb-2">اختر المعلم</label>
-                        <div class="relative">
-                             <select name="teacher" required class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 bg-white shadow-sm appearance-none">
-                                <option value="" disabled selected>-- اختر من القائمة --</option>
-                                {% for teacher in form.teacher.field.queryset %}
-                                    <option value="{{ teacher.id }}">{{ teacher }}</option>
-                                {% endfor %}
-                            </select>
-                            <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center px-3 text-gray-500">
-                                <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                <div class="flex justify-between items-center p-5 border-b border-gray-100 bg-gray-50 rounded-t-2xl">
+                    <h3 class="text-xl font-bold text-gray-800">إضافة حصة جديدة</h3>
+                    <button @click="showModal = false" class="text-gray-400 hover:text-red-500 transition-colors p-1 rounded-full hover:bg-gray-200 focus:outline-none">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                    </button>
+                </div>
+                
+                <div class="p-6">
+                    <form hx-post="{% url 'admin_schedule_view' %}" hx-target="#schedule-container" hx-swap="innerHTML" @htmx:after-request="if($event.detail.successful) showModal = false">
+                        {% csrf_token %}
+                        <input type="hidden" name="section" value="{{ section_id }}">
+                        
+                        {% if form.errors %}
+                        <div class="mb-4 bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative">
+                            {{ form.non_field_errors }}
+                            {% for field in form %}
+                                {% if field.errors %}
+                                    <p>{{ field.label }}: {{ field.errors|striptags }}</p>
+                                {% endif %}
+                            {% endfor %}
+                        </div>
+                        {% endif %}
+                        
+                        <div class="space-y-5">
+                            <!-- اختيار المعلم -->
+                            <div>
+                                <label class="block text-sm font-semibold text-gray-700 mb-2">اختر المعلم</label>
+                                <div class="relative">
+                                     <select name="teacher" x-model="selectedTeacher" @change="updateSubjects()" required class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 bg-white shadow-sm appearance-none">
+                                        <option value="" disabled>-- اختر من القائمة --</option>
+                                        {% for teacher in form.teacher.field.queryset %}
+                                            <option value="{{ teacher.id }}" {% if form.teacher.value|add:"0" == teacher.id|add:"0" %}selected{% endif %}>{{ teacher }}</option>
+                                        {% endfor %}
+                                    </select>
+                                    <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center px-3 text-gray-500">
+                                        <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- اختيار المادة -->
+                            <div>
+                                <label class="block text-sm font-semibold text-gray-700 mb-2">المادة الدراسية</label>
+                                <div class="relative">
+                                    <select name="subject" required :disabled="!selectedTeacher || availableSubjects.length === 0" class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 bg-white shadow-sm appearance-none disabled:bg-gray-100 disabled:text-gray-400">
+                                        <option value="" disabled selected x-text="availableSubjects.length === 0 && selectedTeacher ? '-- المعلم لا يدرس أي مادة --' : '-- اختر المادة --'"></option>
+                                        <template x-for="subj in availableSubjects" :key="subj.id">
+                                            <option :value="subj.id" x-text="subj.name" :selected="subj.id == '{{ form.subject.value|default:'' }}'"></option>
+                                        </template>
+                                    </select>
+                                    <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center px-3 text-gray-500">
+                                        <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- الوقت والتاريخ -->
+                            <div class="grid grid-cols-2 gap-5">
+                                <div>
+                                    <label class="block text-sm font-semibold text-gray-700 mb-2">اليوم</label>
+                                    <select name="day_of_week" required class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 bg-white shadow-sm">
+                                        {% for val, name in days %}
+                                            <option value="{{ val }}">{{ name }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-semibold text-gray-700 mb-2">الحصة</label>
+                                    <select name="period" required class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 bg-white shadow-sm">
+                                        {% for p in periods %}
+                                            <option value="{{ p }}">الحصة {{ p }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
                             </div>
                         </div>
-                    </div>
-                    
-                    <!-- اختيار المادة -->
-                    <div>
-                        <label class="block text-sm font-semibold text-gray-700 mb-2">المادة الدراسية</label>
-                        <div class="relative">
-                            <select name="subject" required class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 bg-white shadow-sm appearance-none">
-                                <option value="" disabled selected>-- اختر المادة --</option>
-                                {% for subject in form.subject.field.queryset %}
-                                    <option value="{{ subject.id }}">{{ subject }}</option>
-                                {% endfor %}
-                            </select>
-                            <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center px-3 text-gray-500">
-                                <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- الوقت والتاريخ -->
-                    <div class="grid grid-cols-2 gap-5">
-                        <div>
-                            <label class="block text-sm font-semibold text-gray-700 mb-2">اليوم</label>
-                            <select name="day_of_week" required class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 bg-white shadow-sm">
-                                {% for val, name in days %}
-                                    <option value="{{ val }}">{{ name }}</option>
-                                {% endfor %}
-                            </select>
-                        </div>
-                        <div>
-                            <label class="block text-sm font-semibold text-gray-700 mb-2">الحصة</label>
-                            <select name="period" required class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 bg-white shadow-sm">
-                                {% for p in periods %}
-                                    <option value="{{ p }}">الحصة {{ p }}</option>
-                                {% endfor %}
-                            </select>
-                        </div>
-                    </div>
-                </div>
 
-                <div class="mt-8 flex justify-end gap-3">
-                    <button type="button" onclick="document.getElementById('add-schedule-modal').classList.add('hidden')" class="px-5 py-2.5 rounded-lg text-gray-700 hover:bg-gray-100 transition font-semibold">
-                        إلغاء
-                    </button>
-                    <button type="submit" class="bg-indigo-600 text-white px-8 py-2.5 rounded-lg hover:bg-indigo-700 shadow-md hover:shadow-lg transition font-semibold">
-                        حفظ
-                    </button>
+                        <div class="mt-8 flex justify-end gap-3">
+                            <button type="button" @click="showModal = false" class="px-5 py-2.5 rounded-lg text-gray-700 hover:bg-gray-100 transition font-semibold">
+                                إلغاء
+                            </button>
+                            <button type="submit" class="bg-indigo-600 text-white px-8 py-2.5 rounded-lg hover:bg-indigo-700 shadow-md hover:shadow-lg transition font-semibold">
+                                حفظ
+                            </button>
+                        </div>
+                    </form>
                 </div>
-            </form>
+            </div>
         </div>
-    </div>
-</div>
-
-<style>
-    @keyframes fadeInUp {
-        from { opacity: 0; transform: translateY(10px); }
-        to { opacity: 1; transform: translateY(0); }
-    }
-    .animate-fade-in-up {
-        animation: fadeInUp 0.4s ease-out forwards;
-    }
-</style>
-
-<!-- موديول إضافة حصة (Modal) -->
-<div id="add-schedule-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 transition-opacity">
-    <div class="bg-white rounded-xl shadow-lg w-full max-w-lg mx-4">
-        <div class="flex justify-between items-center p-4 border-b">
-            <h3 class="text-xl font-bold text-gray-800">إضافة حصة للمسار</h3>
-            <button onclick="document.getElementById('add-schedule-modal').classList.add('hidden')" class="text-gray-400 hover:text-gray-800">
-                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
-            </button>
-        </div>
-        <div class="p-6">
-            <form method="post" action="{% url 'admin_schedule_view' %}">
-                {% csrf_token %}
-                <input type="hidden" name="section" value="{{ section_id }}">
-                
-                <div class="space-y-4">
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">المعلم</label>
-                        <select name="teacher" required class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-1 focus:ring-indigo-500">
-                            <!-- سيتم حقن قائمة المعلمين عبر الجانغو الافتراضي، ولكن لتبسيط الأمور سنطلب من الدالة إرسال الـ form -->
-                            {% for teacher in form.teacher.field.queryset %}
-                                <option value="{{ teacher.id }}">{{ teacher }}</option>
-                            {% endfor %}
-                        </select>
-                    </div>
-                    
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">المادة</label>
-                        <select name="subject" required class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-1 focus:ring-indigo-500">
-                            {% for subject in form.subject.field.queryset %}
-                                <option value="{{ subject.id }}">{{ subject }}</option>
-                            {% endfor %}
-                        </select>
-                    </div>
-                    
-                    <div class="grid grid-cols-2 gap-4">
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">اليوم</label>
-                            <select name="day_of_week" required class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-1 focus:ring-indigo-500">
-                                {% for val, name in days %}
-                                    <option value="{{ val }}">{{ name }}</option>
-                                {% endfor %}
-                            </select>
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">رقم الحصة</label>
-                            <select name="period" required class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-1 focus:ring-indigo-500">
-                                {% for p in periods %}
-                                    <option value="{{ p }}">الحصة {{ p }}</option>
-                                {% endfor %}
-                            </select>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="mt-6 flex justify-end">
-                    <button type="submit" class="bg-indigo-600 text-white px-6 py-2 rounded-lg hover:bg-indigo-700 transition font-semibold w-full">
-                        حفظ في الجدول
-                    </button>
-                </div>
-            </form>
-        </div>
-    </div>
 </div>

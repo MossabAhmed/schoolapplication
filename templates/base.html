@@ -20,14 +20,23 @@
         body { font-family: 'Cairo', sans-serif; }
     </style>
 </head>
-<body class="bg-gray-50 text-gray-800 antialiased" hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'>
+<body class="bg-gray-50 text-gray-800 antialiased" hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}' x-data="{ sidebarOpen: false }">
 
     <div class="flex h-screen overflow-hidden">
         
+        <!-- خلفية داكنة للشريط الجانبي في الشاشات الصغيرة -->
+        <div x-show="sidebarOpen" style="display: none;" class="fixed inset-0 z-20 bg-black opacity-50 md:hidden" @click="sidebarOpen = false"></div>
+
         <!-- الشريط الجانبي (Sidebar) -->
-        <aside class="w-64 bg-indigo-700 text-white flex flex-col hidden md:flex text-right">
-            <div class="h-16 flex items-center justify-center border-b border-indigo-600">
-                <h1 class="text-2xl font-bold tracking-wider">مدرستي</h1>
+        <aside :class="{ 'translate-x-0 opacity-100 pointer-events-auto': sidebarOpen, 'translate-x-full opacity-0 md:opacity-100 pointer-events-none md:pointer-events-auto': !sidebarOpen }" class="translate-x-full fixed inset-y-0 right-0 z-30 w-64 bg-indigo-800 text-white flex flex-col text-right transition-all duration-300 ease-in-out md:static md:translate-x-0">
+            <div class="h-16 flex items-center justify-between px-4 border-b border-indigo-700">
+                <h1 class="text-2xl font-bold tracking-wider mx-auto">مدرستي</h1>
+                <!-- زر إغلاق للشاشات الصغيرة -->
+                <button @click="sidebarOpen = false" class="md:hidden text-white focus:outline-none">
+                    <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </button>
             </div>
             <nav class="flex-1 px-4 py-4 space-y-2 overflow-y-auto">
                 {% if user.is_authenticated %}
@@ -36,8 +45,10 @@
                         <a href="/admin/" target="_blank" class="block px-4 py-2 mt-2 text-sm font-semibold rounded-lg hover:bg-indigo-600">قاعدة البيانات (Django Admin)</a>
                     {% elif user.role == 'Teacher' %}
                         <a href="{% url 'teacher_dashboard' %}" class="block px-4 py-2 mt-2 text-sm font-semibold rounded-lg hover:bg-indigo-600">لوحة المعلم</a>
+                        <a href="{% url 'teacher_schedule' %}" class="block px-4 py-2 mt-2 text-sm font-semibold rounded-lg hover:bg-indigo-600">الجدول الدراسي</a>
+                        <a href="{% url 'teacher_students_list' %}" class="block px-4 py-2 mt-2 text-sm font-semibold rounded-lg hover:bg-indigo-600">قائمة الطلاب</a>
                         <a href="{% url 'teacher_attendance' %}" class="block px-4 py-2 mt-2 text-sm font-semibold rounded-lg hover:bg-indigo-600">سجل الحضور</a>
-                        <a href="{% url 'teacher_grading' %}" class="block px-4 py-2 mt-2 text-sm font-semibold rounded-lg hover:bg-indigo-600">الدرجات</a>
+                        <a href="{% url 'teacher_grading' %}" class="block px-4 py-2 mt-2 text-sm font-semibold rounded-lg hover:bg-indigo-600">الدرجات وتقييمات</a>
                     {% elif user.role == 'Student' %}
                         <a href="{% url 'student_dashboard' %}" class="block px-4 py-2 mt-2 text-sm font-semibold rounded-lg hover:bg-indigo-600">لوحة الطالب</a>
                         <a href="{% url 'student_grades' %}" class="block px-4 py-2 mt-2 text-sm font-semibold rounded-lg hover:bg-indigo-600">درجاتي</a>
@@ -57,16 +68,18 @@
         </aside>
 
         <!-- المحتوى الرئيسي (Main Content) -->
-        <div class="flex-1 flex flex-col overflow-hidden">
+        <div class="flex-1 flex flex-col overflow-hidden w-full">
             <!-- الهيدر (Header) -->
-            <header class="h-16 bg-white shadow flex justify-between items-center px-6">
+            <header class="h-16 bg-white shadow flex justify-between items-center px-4 sm:px-6">
                 <!-- زر القائمة للهاتف -->
-                <button class="md:hidden text-gray-500 focus:outline-none">
+                <button @click="sidebarOpen = true" class="md:hidden text-gray-500 focus:outline-none">
                     <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
                     </svg>
                 </button>
-                <div class="flex items-center">
+                <div class="flex items-center w-full justify-end md:justify-between">
+                    <!-- عنوان مخفي في الشاشات الصغيرة ويظهر في الكبيرة إذا أردت -->
+                    <div class="hidden md:block"></div>
                     {% if user.is_authenticated %}
                         <div class="relative flex items-center" x-data="{ open: false }">
                             <button @click="open = !open" class="flex items-center space-x-2 space-x-reverse focus:outline-none">

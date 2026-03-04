@@ -5,21 +5,73 @@
 {% block content %}
 <div class="mb-6">
     <h1 class="text-3xl font-bold text-gray-800">أهلاً بك، أ. {{ user.get_full_name|default:user.username }}</h1>
-    <p class="text-gray-600 mt-2">إليك ملخص سريع لأهم الإحصائيات والأحداث اليومية.</p>
+    <p class="text-gray-600 mt-2">إليك ملخص سريع لأهم الإحصائيات الخاصة بك.</p>
 </div>
 
-<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-    <!-- البطاقات الإحصائية (سيتم تغذيتها بالبيانات الفعلية في الخطوة 3) -->
+<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+
     <div class="bg-white rounded-xl shadow p-6 border-r-4 border-indigo-500">
         <h3 class="text-gray-500 font-semibold mb-1">الفصول التي أدرسها</h3>
-        <p class="text-3xl font-bold text-gray-800">-</p>
-    </div>
-    
-    <div class="bg-white rounded-xl shadow p-6 border-r-4 border-green-500">
-        <h3 class="text-gray-500 font-semibold mb-1">واجبات قيد التقييم</h3>
-        <p class="text-3xl font-bold text-gray-800">-</p>
+        <p class="text-3xl font-bold text-gray-800">{{ sections_count }}</p>
     </div>
 
-    <!-- بطاقات إضافية -->
+    <div class="bg-white rounded-xl shadow p-6 border-r-4 border-emerald-500">
+        <h3 class="text-gray-500 font-semibold mb-1">إجمالي طلابي</h3>
+        <p class="text-3xl font-bold text-gray-800">{{ students_count }}</p>
+    </div>
+
 </div>
+
+<!-- ربما نضيف لاحقا جدول حصص المعلم لليوم النشط هنا -->
+<div class="mt-8 bg-white rounded-xl shadow overflow-hidden">
+    <div class="p-6 border-b border-gray-100">
+        <h2 class="text-xl font-bold text-gray-800">جدول حصص اليوم</h2>
+        <p class="text-gray-500 text-sm mt-1">الحصص المجدولة لك في هذا اليوم حسب ترتيبها.</p>
+    </div>
+    
+    <div class="overflow-x-auto">
+        <table class="w-full text-sm text-right text-gray-500">
+            <thead class="text-xs text-gray-700 uppercase bg-gray-50">
+                <tr>
+                    <th scope="col" class="px-6 py-4">رقم الحصة</th>
+                    <th scope="col" class="px-6 py-4">الشعبة</th>
+                    <th scope="col" class="px-6 py-4">المادة</th>
+                    <th scope="col" class="px-6 py-4">إجراءات سريعة</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for sched in today_schedules %}
+                <tr class="bg-white border-b hover:bg-gray-50 transition-colors">
+                    <th scope="row" class="px-6 py-4 font-bold text-gray-900 whitespace-nowrap">
+                        الحصة {{ sched.period }}
+                    </th>
+                    <td class="px-6 py-4 font-medium text-indigo-600">
+                        {{ sched.section.grade.name }} - {{ sched.section.name }}
+                    </td>
+                    <td class="px-6 py-4">
+                        <span class="bg-indigo-100 text-indigo-800 text-xs font-semibold px-2.5 py-0.5 rounded">
+                            {{ sched.subject.name }}
+                        </span>
+                    </td>
+                    <td class="px-6 py-4 flex gap-3">
+                        <a href="{% url 'teacher_attendance' %}?schedule_id={{ sched.id }}" class="bg-emerald-50 text-emerald-600 hover:bg-emerald-600 hover:text-white px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-200 flex items-center gap-2 shadow-sm border border-emerald-100 w-max">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                            سجل الحضور
+                        </a>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="4" class="px-6 py-12 text-center text-gray-500">
+                        <svg class="w-12 h-12 text-gray-300 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path></svg>
+                        <p class="text-lg font-medium">ليس لديك أي حصص مجدولة لهذا اليوم.</p>
+                        <p class="text-sm">استمتع بيومك!</p>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
 {% endblock %}

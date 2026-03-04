@@ -72,6 +72,7 @@ class Attendance(models.Model):
     schedule = models.ForeignKey(Schedule, on_delete=models.CASCADE, related_name="attendances", verbose_name="الجدول")
     date = models.DateField(verbose_name="التاريخ")
     status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='Present', verbose_name="الحالة")
+    notes = models.CharField(max_length=255, null=True, blank=True, verbose_name="ملاحظات")
 
     class Meta:
         unique_together = ('student', 'schedule', 'date')
@@ -108,6 +109,7 @@ class GradeRecord(models.Model):
     assignment = models.ForeignKey(Assignment, on_delete=models.CASCADE, null=True, blank=True, related_name="grades", verbose_name="الواجب (اختياري)")
     exam_title = models.CharField(max_length=100, null=True, blank=True, verbose_name="عنوان الامتحان (إن لم يكن واجباً)")
     score = models.DecimalField(max_digits=5, decimal_places=2, verbose_name="الدرجة")
+    notes = models.CharField(max_length=255, null=True, blank=True, verbose_name="ملاحظات")
     recorded_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):

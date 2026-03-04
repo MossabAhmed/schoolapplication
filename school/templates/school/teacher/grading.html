@@ -1,0 +1,45 @@
+{% extends 'base.html' %}
+
+{% block title %}إدخال الدرجات والتقييمات{% endblock %}
+
+{% block content %}
+<div class="mb-6">
+    <h1 class="text-3xl font-bold text-gray-800">إدخال الدرجات والتقييمات</h1>
+    <p class="text-gray-600 mt-2">اختر الشعبة لإدخال درجات التقييم لطلابها بشكل جماعي وسريع.</p>
+</div>
+
+<div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
+    
+    <!-- القائمة الجانبية للشعب -->
+    <div class="lg:col-span-1 bg-white rounded-xl shadow p-6">
+        <h2 class="text-xl font-bold text-gray-800 mb-4 border-b border-gray-100 pb-2">الشعب الدراسية</h2>
+        <div class="space-y-2" x-data="{ selectedSection: '{{ request.GET.section_id|default:'' }}' }"
+             x-init="if(selectedSection) { htmx.ajax('GET', '{% url 'teacher_get_grading_list' %}?section_id=' + selectedSection, {target: '#grading-main-area'}); }">
+            {% for section in sections %}
+            <button @click="selectedSection = '{{ section.id }}'"
+                    hx-get="{% url 'teacher_get_grading_list' %}" 
+                    hx-vals='{"section_id": "{{ section.id }}"}'
+                    hx-target="#grading-main-area"
+                    :class="selectedSection === '{{ section.id }}' ? 'bg-amber-500 text-white border-transparent' : 'bg-white text-gray-700 border-gray-200 hover:bg-gray-50 hover:border-amber-300'"
+                    class="w-full text-right px-4 py-3 rounded-lg border transition-all duration-200 font-medium flex items-center justify-between group">
+                <span>{{ section.grade.name }} - {{ section.name }}</span>
+                <svg class="w-5 h-5 opacity-0 group-hover:opacity-100 transition-opacity" :class="selectedSection === '{{ section.id }}' ? 'opacity-100' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
+            </button>
+            {% empty %}
+            <div class="text-sm text-gray-500 text-center py-4 bg-gray-50 rounded-lg">
+                لا توجد شعب مسندة إليك حالياً.
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- منطقة عرض قائمة الطلاب للدرجات -->
+    <div class="lg:col-span-3" id="grading-main-area">
+        <div class="bg-white rounded-xl shadow p-12 text-center text-gray-500 border border-dashed border-gray-300">
+            <svg class="w-16 h-16 mx-auto text-amber-300 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
+            <h3 class="text-lg font-medium text-gray-900 mb-2">الرجاء اختيار الشعبة</h3>
+            <p>قم باختيار إحدى الشعب من القائمة الجانبية لعرض الطلاب وإدخال درجاتهم.</p>
+        </div>
+    </div>
+</div>
+{% endblock %}

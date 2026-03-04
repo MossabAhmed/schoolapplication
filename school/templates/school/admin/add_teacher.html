@@ -35,11 +35,24 @@
                 }">
                     {% if field.name == 'enrollment_number' %}
                         <input type="text" name="{{ field.name }}" id="{{ field.id_for_label }}" maxlength="5" required x-ref="enrollmentInput"
-                               class="w-full px-4 py-2 border border-gray-300 rounded-r-lg outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500">
+                               class="{{ field.field.widget.attrs.class|default:'w-full px-4 py-2 border border-gray-300 rounded-r-lg outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500' }}">
                         <button type="button" @click.prevent="generateNumber()" 
                                 class="bg-emerald-100 text-emerald-700 font-semibold px-4 py-2 rounded-l-lg hover:bg-emerald-200 border border-gray-300 border-r-0 transition whitespace-nowrap">
                             توليد تلقائي
                         </button>
+                    {% elif field.name == 'subjects' %}
+                        <div class="space-y-2 border border-gray-200 p-4 rounded-lg max-h-48 overflow-y-auto">
+                            {% for checkbox in field %}
+                                <div class="flex items-center">
+                                    <label class="inline-flex items-center cursor-pointer">
+                                        <input type="checkbox" name="{{ field.name }}" value="{{ checkbox.data.value }}" 
+                                            class="form-checkbox h-5 w-5 text-emerald-600 rounded border-gray-300 focus:ring-emerald-500 transition duration-150 ease-in-out"
+                                            {% if checkbox.data.selected %}checked{% endif %}>
+                                        <span class="mr-2 text-gray-700">{{ checkbox.choice_label }}</span>
+                                    </label>
+                                </div>
+                            {% endfor %}
+                        </div>
                     {% else %}
                         {{ field }}
                     {% endif %}
@@ -60,33 +73,4 @@
         </div>
     </form>
 </div>
-
-<style>
-    /* تنسيق حقول الإدخال لتتناسب مع Tailwind */
-    input[type="text"], input[type="password"], select {
-        width: 100%;
-        padding: 0.5rem 1rem;
-        border: 1px solid #d1d5db;
-        border-radius: 0.5rem;
-        outline: none;
-        transition: border-color 0.2s;
-    }
-    input[type="text"]:focus, input[type="password"]:focus, select:focus {
-        border-color: #10b981;
-        box-shadow: 0 0 0 1px #10b981;
-    }
-    /* تنسيق الـ Checkboxes */
-    input[type="checkbox"] {
-        margin-left: 0.5rem;
-    }
-    #id_subjects {
-        display: flex;
-        flex-direction: column;
-        gap: 0.5rem;
-    }
-    #id_subjects div {
-        display: flex;
-        align-items: center;
-    }
-</style>
 {% endblock %}

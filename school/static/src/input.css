@@ -1,8 +1,14 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
+
+@source "../../../templates";
+@source "../../../school/templates";
+
+@theme {
+  --font-sans: "Cairo", sans-serif;
+}
 
 body {
     direction: rtl; /* ضمان اتجاه اليمين لليسار في كل مكان */
     text-align: right;
+    font-family: var(--font-sans);
 }

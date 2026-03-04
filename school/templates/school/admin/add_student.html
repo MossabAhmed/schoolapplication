@@ -35,7 +35,7 @@
                 }">
                     {% if field.name == 'enrollment_number' %}
                         <input type="text" name="{{ field.name }}" id="{{ field.id_for_label }}" maxlength="5" required x-ref="enrollmentInput"
-                               class="w-full px-4 py-2 border border-gray-300 rounded-r-lg outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500">
+                               class="{{ field.field.widget.attrs.class|default:'w-full px-4 py-2 border border-gray-300 rounded-r-lg outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500' }}">
                         <button type="button" @click.prevent="generateNumber()" 
                                 class="bg-indigo-100 text-indigo-700 font-semibold px-4 py-2 rounded-l-lg hover:bg-indigo-200 border border-gray-300 border-r-0 transition whitespace-nowrap">
                             توليد تلقائي
@@ -60,20 +60,4 @@
         </div>
     </form>
 </div>
-
-<style>
-    /* تنسيق حقول الإدخال لتتناسب مع Tailwind */
-    input[type="text"], input[type="password"], select {
-        width: 100%;
-        padding: 0.5rem 1rem;
-        border: 1px solid #d1d5db;
-        border-radius: 0.5rem;
-        outline: none;
-        transition: border-color 0.2s;
-    }
-    input[type="text"]:focus, input[type="password"]:focus, select:focus {
-        border-color: #4f46e5;
-        box-shadow: 0 0 0 1px #4f46e5;
-    }
-</style>
 {% endblock %}

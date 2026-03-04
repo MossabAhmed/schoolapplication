@@ -1,0 +1,63 @@
+{% extends 'base.html' %}
+
+{% block title %}سجل الدرجات والتقييمات{% endblock %}
+
+{% block content %}
+<div class="mb-6 flex justify-between items-center">
+    <div>
+        <h1 class="text-3xl font-bold text-gray-800">سجل الدرجات</h1>
+        <p class="text-gray-600 mt-2">استعرض درجاتك لجميع التقييمات السابقة.</p>
+    </div>
+    <a href="{% url 'student_dashboard' %}" class="bg-gray-100 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-200 transition font-medium flex items-center gap-2">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
+        العودة للرئيسية
+    </a>
+</div>
+
+<div class="bg-white rounded-xl shadow overflow-hidden">
+    <div class="overflow-x-auto">
+        <table class="w-full text-sm text-right text-gray-500">
+            <thead class="text-xs text-gray-700 uppercase bg-gray-50 border-b">
+                <tr>
+                    <th scope="col" class="px-6 py-4 whitespace-nowrap min-w-[200px]">عنوان التقييم</th>
+                    <th scope="col" class="px-6 py-4 whitespace-nowrap min-w-[150px]">تاريخ الرصد</th>
+                    <th scope="col" class="px-6 py-4 text-center whitespace-nowrap min-w-[120px]">الدرجة</th>
+                    <th scope="col" class="px-6 py-4 whitespace-nowrap min-w-[250px]">ملاحظات</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for grade in grades %}
+                <tr class="bg-white border-b hover:bg-gray-50 transition-colors">
+                    <td class="px-6 py-4 font-bold text-gray-900 text-base">
+                        {{ grade.exam_title|default:"بدون عنوان" }}
+                        {% if grade.assignment %}
+                        <span class="block text-xs font-normal text-indigo-500 mt-1">مرتبط بواجب: {{ grade.assignment.title }}</span>
+                        {% endif %}
+                    </td>
+                    <td class="px-6 py-4 text-gray-600">
+                        {{ grade.recorded_at|date:"j F Y - h:i A" }}
+                    </td>
+                    <td class="px-6 py-4 text-center">
+                        <span class="bg-emerald-100 text-emerald-800 px-4 py-2 rounded-lg font-bold text-lg inline-block min-w-[80px]">
+                            {{ grade.score|floatformat:-2 }} / 100
+                        </span>
+                    </td>
+                    <td class="px-6 py-4 text-gray-600">
+                        {{ grade.notes|default:"-" }}
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="4" class="px-6 py-16 text-center text-gray-500">
+                        <div class="flex flex-col items-center">
+                            <svg class="w-16 h-16 text-gray-300 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                            <p class="text-lg">لم يتم رصد أي درجات لك حتى الآن.</p>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

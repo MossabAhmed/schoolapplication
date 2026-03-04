@@ -5,19 +5,112 @@
 {% block content %}
 <div class="mb-6">
     <h1 class="text-3xl font-bold text-gray-800">أهلاً بك، {{ user.get_full_name|default:user.username }}</h1>
-    <p class="text-gray-600 mt-2">أتمنى لك يوماً دراسياً ممتعاً!</p>
+    <p class="text-gray-600 mt-2">
+        {% if student_profile.section %}
+            أنت مسجل في: <span class="font-bold text-indigo-600">{{ student_profile.section.grade.name }} - {{ student_profile.section.name }}</span>
+        {% else %}
+            أنت غير مسجل في أي شعبة حالياً.
+        {% endif %}
+    </p>
 </div>
 
-<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-    <!-- البطاقات الإحصائية (سيتم تغذيتها بالبيانات الفعلية في الخطوة 4) -->
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
     <div class="bg-white rounded-xl shadow p-6 border-r-4 border-indigo-500">
+        <h3 class="text-gray-500 font-semibold mb-1">نسبة الحضور</h3>
+        <p class="text-3xl font-bold text-gray-800" :class="{'text-emerald-600': {{ attendance_rate }} >= 90, 'text-red-600': {{ attendance_rate }} < 80}">{{ attendance_rate }}%</p>
+    </div>
+    
+    <div class="bg-white rounded-xl shadow p-6 border-r-4 border-emerald-500">
+        <h3 class="text-gray-500 font-semibold mb-1">التقييمات المنجزة</h3>
+        <p class="text-3xl font-bold text-gray-800">{{ grades_count }}</p>
+    </div>
+    
+    <div class="bg-white rounded-xl shadow p-6 border-r-4 border-amber-500">
         <h3 class="text-gray-500 font-semibold mb-1">الواجبات المعلقة</h3>
         <p class="text-3xl font-bold text-gray-800">-</p>
     </div>
     
-    <div class="bg-white rounded-xl shadow p-6 border-r-4 border-yellow-500">
-        <h3 class="text-gray-500 font-semibold mb-1">أحدث الدرجات</h3>
-        <p class="text-3xl font-bold text-gray-800">-</p>
+    <div class="bg-white rounded-xl shadow p-6 border-r-4 border-sky-500">
+        <h3 class="text-gray-500 font-semibold mb-1">رقم القيد</h3>
+        <p class="text-xl font-bold text-gray-800 mt-2 font-mono">{{ student_profile.enrollment_number }}</p>
+    </div>
+</div>
+
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+    <!-- جدول حصص اليوم -->
+    <div class="lg:col-span-2 bg-white rounded-xl shadow overflow-hidden flex flex-col">
+        <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-gray-50">
+            <h2 class="text-xl font-bold text-gray-800">جدول حصص اليوم</h2>
+            <div class="bg-indigo-100 text-indigo-800 px-3 py-1 rounded-full text-sm font-semibold">
+                {% now "l" %}
+            </div>
+        </div>
+        <div class="p-0 flex-1">
+            <div class="overflow-x-auto">
+                <table class="w-full text-sm text-right">
+                    <thead class="text-xs text-gray-500 uppercase bg-white border-b">
+                        <tr>
+                            <th class="px-6 py-3 w-20 text-center">الحصة</th>
+                            <th class="px-6 py-3">المادة</th>
+                            <th class="px-6 py-3 text-center">المعلم</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-100">
+                        {% for schedule in today_schedules %}
+                        <tr class="hover:bg-gray-50 transition-colors">
+                            <td class="px-6 py-4 text-center">
+                                <span class="bg-indigo-50 text-indigo-700 w-8 h-8 rounded-full flex items-center justify-center font-bold text-lg mx-auto">
+                                    {{ schedule.period }}
+                                </span>
+                            </td>
+                            <td class="px-6 py-4 font-bold text-gray-800 text-base">
+                                {{ schedule.subject.name }}
+                            </td>
+                            <td class="px-6 py-4 text-center text-gray-600 font-medium">
+                                أ. {{ schedule.teacher.user.get_full_name }}
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="3" class="px-6 py-12 text-center text-gray-500">
+                                <svg class="w-12 h-12 mx-auto text-gray-300 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                                لا توجد حصص مجدولة لك هذا اليوم.
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- آخر الدرجات -->
+    <div class="bg-white rounded-xl shadow overflow-hidden flex flex-col">
+        <div class="px-6 py-4 border-b border-gray-100 bg-gray-50">
+            <h2 class="text-xl font-bold text-gray-800">آخر التقييمات</h2>
+        </div>
+        <div class="p-0 flex-1">
+            <ul class="divide-y divide-gray-100">
+                {% for grade in recent_grades %}
+                <li class="p-4 hover:bg-gray-50 transition flex justify-between items-center">
+                    <div>
+                        <div class="font-bold text-gray-800">{{ grade.exam_title }}</div>
+                        <div class="text-xs text-gray-500 mt-1">{{ grade.recorded_at|date:"j M Y" }}</div>
+                    </div>
+                    <div class="bg-emerald-100 text-emerald-800 px-3 py-1.5 rounded-lg font-bold">
+                        {{ grade.score|floatformat:-2 }}
+                    </div>
+                </li>
+                {% empty %}
+                <li class="p-8 text-center text-gray-500">
+                    لم يتم رصد أي درجات لك حتى الآن.
+                </li>
+                {% endfor %}
+            </ul>
+        </div>
+        <div class="p-4 bg-gray-50 border-t border-gray-200 text-center">
+            <a href="{% url 'student_grades' %}" class="text-indigo-600 hover:text-indigo-800 text-sm font-semibold">عرض سجل الدرجات الكامل &larr;</a>
+        </div>
     </div>
 </div>
 {% endblock %}

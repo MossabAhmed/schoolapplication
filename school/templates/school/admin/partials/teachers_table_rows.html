@@ -1,0 +1,33 @@
+{% for teacher in teachers %}
+<tr class="bg-white border-b hover:bg-gray-50 transition-colors">
+    <td class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap">
+        {{ teacher.user.get_full_name }}
+    </td>
+    <td class="px-6 py-4">
+        {{ teacher.user.username }}
+    </td>
+    <td class="px-6 py-4">
+        {% for subject in teacher.subjects.all %}
+            <span class="bg-gray-100 text-gray-800 text-xs font-medium mr-1 px-2.5 py-0.5 rounded">{{ subject.name }}</span>
+        {% empty %}
+            <span class="text-gray-400">لا يوجد</span>
+        {% endfor %}
+    </td>
+    <td class="px-6 py-4">
+        {% include 'school/admin/partials/user_status_toggle.html' with user_obj=teacher.user %}
+    </td>
+    <td class="px-6 py-4 flex gap-3">
+        <a href="{% url 'admin_edit_teacher' teacher.user.id %}" class="text-blue-600 hover:text-blue-900 font-medium my-auto">تعديل</a>
+        <form method="post" action="{% url 'admin_delete_user' teacher.user.id %}" class="my-auto" onsubmit="return confirm('هل أنت متأكد من حذف هذا المعلم؟ سيتم حذف جميع البيانات المرتبطة به.');">
+            {% csrf_token %}
+            <button type="submit" class="text-red-600 hover:text-red-900 font-medium">حذف</button>
+        </form>
+    </td>
+</tr>
+{% empty %}
+<tr>
+    <td colspan="5" class="px-6 py-8 text-center text-gray-500">
+        لا يوجد معلمين مطابلقين للبحث أو مسجلين.
+    </td>
+</tr>
+{% endfor %}

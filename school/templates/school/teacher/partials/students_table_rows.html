@@ -1,0 +1,38 @@
+{% for student in students %}
+<tr class="bg-white border-b hover:bg-gray-50 transition-colors">
+    <td class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap flex items-center gap-3">
+        <div class="h-8 w-8 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-700 font-bold p-1">
+            {{ student.user.first_name|first }}{{ student.user.last_name|first }}
+        </div>
+        <div>
+            <div class="font-semibold">{{ student.user.get_full_name }}</div>
+            <div class="text-xs text-gray-500">{{ student.user.email }}</div>
+        </div>
+    </td>
+    <td class="px-6 py-4 font-mono text-gray-600">
+        {{ student.user.enrollment_number|default:'-' }}
+    </td>
+    <td class="px-6 py-4">
+        <span class="bg-indigo-50 text-indigo-700 text-xs px-2 py-1 rounded-md border border-indigo-100">
+            {{ student.section.grade.name }} - {{ student.section.name }}
+        </span>
+    </td>
+    <td class="px-6 py-4 text-center">
+        <!-- أزرار تفاعلية سريعة -->
+        <div class="flex items-center justify-center space-x-2 space-x-reverse">
+            <a href="{% url 'teacher_grading' %}?section_id={{ student.section.id }}#student-{{ student.id }}" class="text-emerald-600 hover:text-white bg-emerald-50 hover:bg-emerald-600 p-2 rounded-lg transition-all duration-200 border border-emerald-100 shadow-sm" title="إضافة درجة للتقييم">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path></svg>
+            </a>
+        </div>
+    </td>
+</tr>
+{% empty %}
+<tr>
+    <td colspan="4" class="px-6 py-12 text-center text-gray-500">
+        <div class="flex flex-col items-center">
+            <svg class="w-12 h-12 text-gray-300 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
+            <p>لم يتم العثور على طلاب مطابِقين للبحث في هذه الشعبة.</p>
+        </div>
+    </td>
+</tr>
+{% endfor %}

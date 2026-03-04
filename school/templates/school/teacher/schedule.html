@@ -1,0 +1,66 @@
+{% extends 'base.html' %}
+
+{% block title %}الجدول الدراسي العام{% endblock %}
+
+{% block content %}
+<div class="mb-8">
+    <h1 class="text-3xl font-bold text-gray-800">الجدول الدراسي العام</h1>
+    <p class="text-gray-600 mt-2">يعرض جميع حصصك المجدولة خلال الأسبوع الدراسي.</p>
+</div>
+
+<!-- Grid / Table view for Weekly Schedule -->
+<div class="bg-white rounded-xl shadow overflow-hidden">
+    <div class="overflow-x-auto">
+        <table class="w-full min-w-[900px] text-sm text-right text-gray-500 border-collapse">
+            <thead class="text-xs text-gray-700 uppercase bg-gray-100 border-b">
+                <tr>
+                    <th scope="col" class="px-6 py-4 font-bold text-gray-800 w-32 border-l border-gray-200 whitespace-nowrap">
+                        اليوم / الحصة
+                    </th>
+                    {% for p in periods %}
+                        <th scope="col" class="px-4 py-4 font-bold text-gray-800 text-center w-28 whitespace-nowrap">
+                            الحصة {{ p }}
+                        </th>
+                    {% endfor %}
+                </tr>
+            </thead>
+            <tbody>
+                {% for day_val, day_name in days %}
+                    <tr class="border-b border-gray-100 hover:bg-indigo-50/20 transition-colors h-24">
+                        <!-- عمود اليوم -->
+                        <th scope="row" class="px-6 py-4 font-bold text-gray-800 bg-gray-50 border-l border-gray-200 whitespace-nowrap align-middle">
+                            {{ day_name }}
+                        </th>
+                        
+                        <!-- مرابع الحصص -->
+                        {% for p in periods %}
+                            <td class="px-2 py-2 border-l border-gray-100 last:border-l-0 align-top relative">
+                                <div class="flex flex-col gap-2 h-full">
+                                    {% for sched_dict in schedule_matrix.items %}
+                                        {% if sched_dict.0 == day_val %}
+                                            {% for p_key, schedules_list in sched_dict.1.items %}
+                                                {% if p_key == p %}
+                                                    {% for sched in schedules_list %}
+                                                        <div class="bg-indigo-50 border border-indigo-100 rounded-lg p-2 text-center shadow-sm hover:shadow-md transition-shadow group relative">
+                                                            <div class="font-bold text-indigo-700 text-xs mb-1">{{ sched.subject.name }}</div>
+                                                            <div class="text-[11px] text-gray-600 font-medium">{{ sched.section.grade.name }} - {{ sched.section.name }}</div>
+                                                        </div>
+                                                    {% empty %}
+                                                        <div class="flex h-full min-h-[4rem] items-center justify-center text-gray-300">
+                                                            -
+                                                        </div>
+                                                    {% endfor %}
+                                                {% endif %}
+                                            {% endfor %}
+                                        {% endif %}
+                                    {% endfor %}
+                                </div>
+                            </td>
+                        {% endfor %}
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

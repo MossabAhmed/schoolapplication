@@ -1,0 +1,75 @@
+<form hx-post="{% url 'teacher_update_exam_grades' %}" hx-swap="none" class="bg-white rounded-xl shadow overflow-hidden mt-6">
+    {% csrf_token %}
+    <input type="hidden" name="section_id" value="{{ section.id }}">
+    <input type="hidden" name="exam_title" value="{{ exam_title }}">
+
+    <div class="px-6 py-5 bg-indigo-50 border-b border-indigo-100 flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div>
+            <h3 class="text-lg font-bold text-indigo-900">تعديل درجات: "{{ exam_title }}"</h3>
+            <p class="text-sm text-indigo-700 mt-1">{{ section.grade.name }} - {{ section.name }}</p>
+        </div>
+    </div>
+
+    <div class="overflow-x-auto">
+        <table class="w-full text-sm text-right text-gray-500">
+            <thead class="text-xs text-gray-700 uppercase bg-gray-50 border-b">
+                <tr>
+                    <th scope="col" class="px-6 py-3 w-16 text-center">#</th>
+                    <th scope="col" class="px-6 py-3 whitespace-nowrap min-w-[200px]">الطالب</th>
+                    <th scope="col" class="px-6 py-3 text-center whitespace-nowrap min-w-[120px]">رقم القيد</th>
+                    <th scope="col" class="px-6 py-3 text-center w-48 min-w-[150px]">الدرجة</th>
+                    <th scope="col" class="px-6 py-3 whitespace-nowrap min-w-[250px]">ملاحظات</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for student in students %}
+                <tr class="bg-white border-b hover:bg-gray-50 transition-colors">
+                    <td class="px-6 py-4 text-center text-gray-400 font-medium">
+                        {{ forloop.counter }}
+                    </td>
+                    <td class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap flex items-center gap-3">
+                        <div class="h-8 w-8 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-700 font-bold p-1">
+                            {{ student.user.first_name|first }}{{ student.user.last_name|first }}
+                        </div>
+                        <div>
+                            <div class="font-semibold">{{ student.user.get_full_name }}</div>
+                        </div>
+                    </td>
+                    <td class="px-6 py-4 text-center font-mono text-gray-600">
+                        {{ student.user.enrollment_number|default:'-' }}
+                    </td>
+                    <td class="px-6 py-4">
+                        <input type="number" step="0.25" min="0" max="100" name="score_{{ student.id }}"
+                            {% for key, record in student_grades.items %}
+                                {% if key == student.id %}value="{{ record.score|stringformat:'s' }}"{% endif %}
+                            {% endfor %}
+                            placeholder="لم يتم الرصد" class="w-full text-center px-3 py-1.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-colors">
+                    </td>
+                    <td class="px-6 py-4">
+                        <input type="text" name="notes_{{ student.id }}"
+                            {% for key, record in student_grades.items %}
+                                {% if key == student.id %}value="{{ record.notes|default:'' }}"{% endif %}
+                            {% endfor %}
+                            placeholder="إضافة ملاحظة..." class="w-full px-3 py-1.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-colors text-sm bg-gray-50 focus:bg-white">
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="5" class="px-6 py-12 text-center text-gray-500">
+                        لا يوجد طلاب في هذه الشعبة.
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    {% if students %}
+    <div class="px-6 py-4 bg-gray-50 border-t border-gray-200 flex justify-end">
+        <button type="submit" class="bg-indigo-600 text-white px-6 py-2.5 rounded-lg hover:bg-indigo-700 transition flex items-center gap-2 font-medium shadow">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
+            تحديث الدرجات
+        </button>
+    </div>
+    {% endif %}
+</form>
