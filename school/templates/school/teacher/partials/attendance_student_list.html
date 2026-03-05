@@ -1,83 +1,85 @@
-<form hx-post="{% url 'teacher_save_attendance' %}" hx-swap="none" class="bg-white rounded-xl shadow overflow-hidden max-w-full">
-    {% csrf_token %}
-    <input type="hidden" name="date" value="{{ selected_date|date:'Y-m-d' }}">
-    <input type="hidden" name="schedule_id" value="{{ schedule.id }}">
-    
-    <div class="px-6 py-4 bg-indigo-50 border-b border-indigo-100 flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div>
-            <h3 class="text-lg font-bold text-indigo-900">سجل حضور: {{ schedule.section.grade.name }} - {{ schedule.section.name }}</h3>
-            <p class="text-sm text-indigo-700 mt-1">تاريخ: {{ formatted_arabic_date }} | الدرس: {{ schedule.subject.name }} (الحصة {{ schedule.period }})</p>
+<div class="w-full max-w-full overflow-hidden">
+    <form hx-post="{% url 'teacher_save_attendance' %}" hx-swap="none" class="bg-white rounded-xl shadow overflow-hidden w-full">
+        {% csrf_token %}
+        <input type="hidden" name="date" value="{{ selected_date|date:'Y-m-d' }}">
+        <input type="hidden" name="schedule_id" value="{{ schedule.id }}">
+        
+        <div class="px-6 py-4 bg-indigo-50 border-b border-indigo-100 flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div>
+                <h3 class="text-lg font-bold text-indigo-900">سجل حضور: {{ schedule.section.grade.name }} - {{ schedule.section.name }}</h3>
+                <p class="text-sm text-indigo-700 mt-1">تاريخ: {{ formatted_arabic_date }} | الدرس: {{ schedule.subject.name }} (الحصة {{ schedule.period }})</p>
+            </div>
         </div>
-    </div>
 
-    <div class="overflow-x-auto max-w-full">
-        <table class="w-full text-sm text-right text-gray-500 table-fixed">
-            <thead class="text-xs text-gray-700 uppercase bg-gray-50 border-b">
-                <tr>
-                    <th scope="col" class="px-3 py-3 w-12 text-center flex-shrink-0">#</th>
-                    <th scope="col" class="px-3 py-3 whitespace-nowrap flex-1 min-w-[150px]">الطالب</th>
-                    <th scope="col" class="px-3 py-3 text-center whitespace-nowrap flex-shrink-0 w-24">رقم القيد</th>
-                    <th scope="col" class="px-3 py-3 text-center flex-shrink-0 w-40">حالة الحضور</th>
-                    <th scope="col" class="px-3 py-3 whitespace-nowrap flex-1 min-w-[180px]">ملاحظات</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for item in student_data %}
-                <tr id="student-{{ item.profile.id }}" class="bg-white border-b hover:bg-gray-50 transition-colors target:bg-indigo-50 target:border-indigo-200">
-                    <td class="px-3 py-4 text-center text-gray-400 font-medium flex-shrink-0 w-12">
-                        {{ forloop.counter }}
-                    </td>
-                    <td class="px-3 py-4 font-medium text-gray-900 whitespace-nowrap flex items-center gap-2 flex-1 min-w-[150px] overflow-hidden">
-                        <div class="h-8 w-8 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-700 font-bold p-1">
-                            {{ item.profile.user.first_name|first }}{{ item.profile.user.last_name|first }}
-                        </div>
-                        <div>
-                            <div class="font-semibold">{{ item.profile.user.get_full_name }}</div>
-                        </div>
-                    </td>
-                    <td class="px-3 py-4 text-center font-mono text-gray-600 flex-shrink-0 w-24">
-                        {{ item.profile.user.enrollment_number|default:'-' }}
-                    </td>
-                    <td class="px-3 py-4 flex-shrink-0 w-40">
-                        <div class="flex justify-center bg-gray-100 p-1 rounded-lg w-max mx-auto shadow-inner">
-                            <label class="cursor-pointer">
-                                <input type="radio" name="status_{{ item.profile.id }}" value="Present" class="peer sr-only"
-                                       {% if item.status == 'Present' %}checked{% endif %}>
-                                <div class="px-4 py-1.5 rounded-md text-sm font-medium transition-all peer-checked:bg-white peer-checked:text-emerald-600 peer-checked:shadow-sm text-gray-500 hover:text-gray-700">
-                                    حاضر
-                                </div>
-                            </label>
-                            <label class="cursor-pointer ml-1">
-                                <input type="radio" name="status_{{ item.profile.id }}" value="Absent" class="peer sr-only"
-                                       {% if item.status == 'Absent' %}checked{% endif %}>
-                                <div class="px-4 py-1.5 rounded-md text-sm font-medium transition-all peer-checked:bg-white peer-checked:text-red-600 peer-checked:shadow-sm text-gray-500 hover:text-gray-700">
-                                    غائب
-                                </div>
-                            </label>
-                        </div>
-                    </td>
-                    <td class="px-3 py-4 flex-1 min-w-[180px]">
-                        <input type="text" name="notes_{{ item.profile.id }}" value="{{ item.notes|default:'' }}" 
-                               placeholder="إضافة ملاحظة..." 
-                               class="w-full px-2 py-1.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-colors text-sm bg-gray-50 focus:bg-white">
-                    </td>
-                </tr>
-                {% empty %}
-                <tr>
-                    <td colspan="5" class="px-3 py-12 text-center text-gray-500">
-                        لا يوجد طلاب في هذه الشعبة.
-                    </td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-    </div>
+        <div class="overflow-x-auto w-full">
+            <table class="w-full text-sm text-right text-gray-500 table-auto">
+                <thead class="text-xs text-gray-700 uppercase bg-gray-50 border-b">
+                    <tr>
+                        <th scope="col" class="px-3 py-3 w-12 text-center">#</th>
+                        <th scope="col" class="px-3 py-3 whitespace-nowrap min-w-[150px]">الطالب</th>
+                        <th scope="col" class="px-3 py-3 text-center whitespace-nowrap w-24">رقم القيد</th>
+                        <th scope="col" class="px-3 py-3 text-center w-40">حالة الحضور</th>
+                        <th scope="col" class="px-3 py-3 whitespace-nowrap min-w-[180px]">ملاحظات</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in student_data %}
+                    <tr id="student-{{ item.profile.id }}" class="bg-white border-b hover:bg-gray-50 transition-colors target:bg-indigo-50 target:border-indigo-200">
+                        <td class="px-3 py-4 text-center text-gray-400 font-medium">
+                            {{ forloop.counter }}
+                        </td>
+                        <td class="px-3 py-4 font-medium text-gray-900 whitespace-nowrap flex items-center gap-2">
+                            <div class="h-8 w-8 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-700 font-bold p-1">
+                                {{ item.profile.user.first_name|first }}{{ item.profile.user.last_name|first }}
+                            </div>
+                            <div>
+                                <div class="font-semibold">{{ item.profile.user.get_full_name }}</div>
+                            </div>
+                        </td>
+                        <td class="px-3 py-4 text-center font-mono text-gray-600">
+                            {{ item.profile.user.enrollment_number|default:'-' }}
+                        </td>
+                        <td class="px-3 py-4">
+                            <div class="flex justify-center bg-gray-100 p-1 rounded-lg w-max mx-auto shadow-inner">
+                                <label class="cursor-pointer">
+                                    <input type="radio" name="status_{{ item.profile.id }}" value="Present" class="peer sr-only"
+                                           {% if item.status == 'Present' %}checked{% endif %}>
+                                    <div class="px-4 py-1.5 rounded-md text-sm font-medium transition-all peer-checked:bg-white peer-checked:text-emerald-600 peer-checked:shadow-sm text-gray-500 hover:text-gray-700">
+                                        حاضر
+                                    </div>
+                                </label>
+                                <label class="cursor-pointer ml-1">
+                                    <input type="radio" name="status_{{ item.profile.id }}" value="Absent" class="peer sr-only"
+                                           {% if item.status == 'Absent' %}checked{% endif %}>
+                                    <div class="px-4 py-1.5 rounded-md text-sm font-medium transition-all peer-checked:bg-white peer-checked:text-red-600 peer-checked:shadow-sm text-gray-500 hover:text-gray-700">
+                                        غائب
+                                    </div>
+                                </label>
+                            </div>
+                        </td>
+                        <td class="px-3 py-4">
+                            <input type="text" name="notes_{{ item.profile.id }}" value="{{ item.notes|default:'' }}" 
+                                   placeholder="إضافة ملاحظة..." 
+                                   class="w-full px-2 py-1.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-colors text-sm bg-gray-50 focus:bg-white">
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="5" class="px-3 py-12 text-center text-gray-500">
+                            لا يوجد طلاب في هذه الشعبة.
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
 
-    {% if student_data %}
-    <div class="px-6 py-4 bg-gray-50 border-t border-gray-200 flex justify-end">
-        <button type="submit" class="bg-indigo-600 text-white px-6 py-2.5 rounded-lg hover:bg-indigo-700 transition flex items-center gap-2 font-medium shadow">
-            حفظ السجل
-        </button>
-    </div>
-    {% endif %}
-</form>
+        {% if student_data %}
+        <div class="px-6 py-4 bg-gray-50 border-t border-gray-200 flex justify-end">
+            <button type="submit" class="bg-indigo-600 text-white px-6 py-2.5 rounded-lg hover:bg-indigo-700 transition flex items-center gap-2 font-medium shadow">
+                حفظ السجل
+            </button>
+        </div>
+        {% endif %}
+    </form>
+</div>
