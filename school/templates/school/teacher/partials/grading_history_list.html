@@ -50,7 +50,7 @@
                             {% for key, record in student_grades.items %}
                                 {% if key == student.id %}value="{{ record.notes|default:'' }}"{% endif %}
                             {% endfor %}
-                            placeholder="إضافة ملاحظة..." class="w-full px-3 py-1.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-colors text-sm bg-gray-50 focus:bg-white">
+                            placeholder="إضافة ملاحظة..." class="w-full min-w-[200px] px-3 py-1.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-colors text-sm bg-gray-50 focus:bg-white">
                     </td>
                 </tr>
                 {% empty %}
