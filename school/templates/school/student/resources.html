@@ -1,0 +1,55 @@
+{% extends 'base.html' %}
+
+{% block title %}المصادر التعليمية والمذكرات{% endblock %}
+
+{% block content %}
+<div class="mb-6">
+    <h1 class="text-3xl font-bold text-gray-800">المصادر التعليمية</h1>
+    <p class="text-gray-600 mt-2">تصفح وحمل المذكرات والملفات المرفوعة من قبل معلميك.</p>
+</div>
+
+<div class="bg-white rounded-xl shadow overflow-hidden w-full max-w-full">
+    <div class="px-6 py-4 border-b border-gray-100 bg-gray-50 flex justify-between items-center">
+        <h2 class="font-bold text-gray-800">مكتبة الملفات</h2>
+        {% if section %}
+        <span class="text-sm px-3 py-1 bg-indigo-100 text-indigo-800 rounded-full font-semibold">{{ section.grade.name }} - {{ section.name }}</span>
+        {% endif %}
+    </div>
+    
+    <div class="p-6">
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {% for resource in resources %}
+            <div class="border border-gray-200 rounded-xl p-5 hover:shadow-md transition-shadow bg-white flex flex-col justify-between group">
+                <div>
+                    <div class="flex items-start justify-between mb-3">
+                        <div class="p-3 bg-indigo-50 rounded-lg text-indigo-600 group-hover:bg-indigo-600 group-hover:text-white transition-colors">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                        </div>
+                        <span class="text-xs font-medium px-2 py-1 bg-gray-100 text-gray-600 rounded-md">{{ resource.subject.name }}</span>
+                    </div>
+                    <h3 class="font-bold text-gray-800 text-lg mb-1 leading-tight line-clamp-2">{{ resource.title }}</h3>
+                    <p class="text-sm text-gray-500 mb-4 flex items-center gap-1">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>
+                        أ. {{ resource.teacher.user.get_full_name }}
+                    </p>
+                </div>
+                
+                <div class="pt-4 border-t border-gray-100 flex items-center justify-between mt-auto">
+                    <span class="text-xs text-gray-400 font-mono" dir="ltr">{{ resource.uploaded_at|date:"Y-m-d" }}</span>
+                    <a href="{{ resource.file.url }}" download class="text-sm font-semibold text-indigo-600 hover:text-indigo-800 flex items-center gap-1">
+                        تحميل
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                    </a>
+                </div>
+            </div>
+            {% empty %}
+            <div class="col-span-full py-12 text-center text-gray-500">
+                <svg class="w-16 h-16 mx-auto text-gray-300 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"></path></svg>
+                <h3 class="text-lg font-medium text-gray-900 mb-1">لا توجد ملفات</h3>
+                <p>لم يقم أي معلم برفع ملفات أو مصادر تعليمية لشعبتك حتى الآن.</p>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endblock %}

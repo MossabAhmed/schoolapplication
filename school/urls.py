@@ -13,7 +13,9 @@ urlpatterns = [
     path('dashboard/admin/add-student/', views.admin_add_student, name='admin_add_student'),
     path('dashboard/admin/add-grade/', views.admin_add_grade, name='admin_add_grade'),
     path('dashboard/admin/sections/edit/<int:pk>/', views.admin_edit_section, name='admin_edit_section'),
+    path('dashboard/admin/sections/delete/<int:pk>/', views.admin_delete_section, name='admin_delete_section'),
     path('dashboard/admin/subjects/edit/<int:pk>/', views.admin_edit_subject, name='admin_edit_subject'),
+    path('dashboard/admin/subjects/delete/<int:pk>/', views.admin_delete_subject, name='admin_delete_subject'),
     path('dashboard/admin/grades/edit/<int:pk>/', views.admin_edit_grade, name='admin_edit_grade'),
     path('dashboard/admin/add-section/', views.admin_add_section, name='admin_add_section'),
     path('dashboard/admin/add-subject/', views.admin_add_subject, name='admin_add_subject'),
@@ -49,8 +51,16 @@ urlpatterns = [
     path('teacher/grades/save/', views.teacher_save_grades, name='teacher_save_grades'),
     path('teacher/grades/history/load/', views.teacher_load_exam_grades, name='teacher_load_exam_grades'),
     path('teacher/grades/history/update/', views.teacher_update_exam_grades, name='teacher_update_exam_grades'),
+    path('teacher/resources/', views.teacher_resources, name='teacher_resources'),
+    path('teacher/resources/delete/<int:resource_id>/', views.teacher_delete_resource, name='teacher_delete_resource'),
+    path('teacher/feedbacks/', views.teacher_feedbacks, name='teacher_feedbacks'),
+    path('teacher/feedbacks/load-students/', views.load_students_for_feedback, name='load_students_for_feedback'),
 
     # مسارات الطالب
     path('student/', views.student_dashboard, name='student_dashboard'),
     path('student/grades/', views.student_grades, name='student_grades'),
+    path('student/schedule/', views.student_schedule, name='student_schedule'),
+    path('student/attendance/', views.student_attendance, name='student_attendance'),
+    path('student/resources/', views.student_resources, name='student_resources'),
+    path('student/feedbacks/', views.student_feedbacks, name='student_feedbacks'),
 ]

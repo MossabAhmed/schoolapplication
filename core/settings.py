@@ -129,6 +129,8 @@ STATICFILES_DIRS = [
     BASE_DIR / 'school/static', # مسار ملفات الـ CSS المُولدة من Tailwind
 ]
 
-LOGIN_REDIRECT_URL = '/'
+MEDIA_URL = '/media/'
+MEDIA_ROOT = BASE_DIR / 'media'
 LOGIN_URL = 'login'
+LOGIN_REDIRECT_URL = 'dashboard_redirect'
 LOGOUT_REDIRECT_URL = 'login'

@@ -24,9 +24,12 @@
 
 <!-- ربما نضيف لاحقا جدول حصص المعلم لليوم النشط هنا -->
 <div class="mt-8 bg-white rounded-xl shadow overflow-hidden">
-    <div class="p-6 border-b border-gray-100">
+    <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-gray-50">
         <h2 class="text-xl font-bold text-gray-800">جدول حصص اليوم</h2>
         <p class="text-gray-500 text-sm mt-1">الحصص المجدولة لك في هذا اليوم حسب ترتيبها.</p>
+        <div class="bg-indigo-100 text-indigo-800 px-3 py-1 rounded-full text-sm font-semibold">
+                {{ today_arabic }}
+        </div>
     </div>
     
     <div class="overflow-x-auto">

@@ -1,0 +1,91 @@
+{% extends 'base.html' %}
+
+{% block title %}سجل الحضور والغياب{% endblock %}
+
+{% block content %}
+<div class="mb-6">
+    <h1 class="text-3xl font-bold text-gray-800">سجل الحضور والغياب</h1>
+    <p class="text-gray-600 mt-2">تابع حالة حضورك وغيابك في مختلف المواد الدراسية.</p>
+</div>
+
+<!-- ملخص الحضور -->
+<div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+    <div class="bg-white rounded-xl shadow p-6 flex items-center justify-between border-r-4 border-indigo-500">
+        <div>
+            <p class="text-sm font-semibold text-gray-500 mb-1">نسبة الحضور</p>
+            <h3 class="text-3xl font-bold text-indigo-700">{{ attendance_percentage }}%</h3>
+        </div>
+        <div class="p-3 bg-indigo-50 rounded-full">
+            <svg class="w-8 h-8 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path></svg>
+        </div>
+    </div>
+
+    <div class="bg-white rounded-xl shadow p-6 flex items-center justify-between border-r-4 border-emerald-500">
+        <div>
+            <p class="text-sm font-semibold text-gray-500 mb-1">أيام الحضور</p>
+            <h3 class="text-3xl font-bold text-emerald-600">{{ total_present }}</h3>
+        </div>
+        <div class="p-3 bg-emerald-50 rounded-full">
+            <svg class="w-8 h-8 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+        </div>
+    </div>
+
+    <div class="bg-white rounded-xl shadow p-6 flex items-center justify-between border-r-4 border-red-500">
+        <div>
+            <p class="text-sm font-semibold text-gray-500 mb-1">أيام الغياب</p>
+            <h3 class="text-3xl font-bold text-red-600">{{ total_absent }}</h3>
+        </div>
+        <div class="p-3 bg-red-50 rounded-full">
+            <svg class="w-8 h-8 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+        </div>
+    </div>
+</div>
+
+<!-- جدول سجل الحضور -->
+<div class="bg-white rounded-xl shadow overflow-hidden w-full max-w-full">
+    <div class="px-6 py-4 border-b border-gray-100 bg-gray-50 flex justify-between items-center">
+        <h2 class="font-bold text-gray-800">تفاصيل السجل</h2>
+    </div>
+    <div class="overflow-x-auto w-full max-w-full">
+        <table class="w-full text-right table-auto">
+            <thead class="bg-gray-50 text-gray-600 text-sm border-b">
+                <tr>
+                    <th class="px-6 py-4 font-semibold w-16 text-center">#</th>
+                    <th class="px-6 py-4 font-semibold whitespace-nowrap min-w-[150px]">التاريخ</th>
+                    <th class="px-6 py-4 font-semibold whitespace-nowrap min-w-[150px]">المادة</th>
+                    <th class="px-6 py-4 font-semibold text-center whitespace-nowrap min-w-[100px]">الحصة</th>
+                    <th class="px-6 py-4 font-semibold whitespace-nowrap min-w-[180px]">المعلم</th>
+                    <th class="px-6 py-4 font-semibold text-center whitespace-nowrap min-w-[120px]">الحالة</th>
+                    <th class="px-6 py-4 font-semibold min-w-[200px]">ملاحظات</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-100 text-sm text-gray-700">
+                {% for record in attendances %}
+                <tr class="hover:bg-gray-50 transition-colors">
+                    <td class="px-6 py-4 text-center text-gray-400">{{ forloop.counter }}</td>
+                    <td class="px-6 py-4 font-medium" dir="ltr" style="text-align: right;">{{ record.date|date:"Y-m-d" }}</td>
+                    <td class="px-6 py-4 font-bold text-indigo-900">{{ record.schedule.subject.name }}</td>
+                    <td class="px-6 py-4 text-center bg-gray-50 text-gray-600 font-medium border-x border-white">الحصة {{ record.schedule.period }}</td>
+                    <td class="px-6 py-4 text-gray-600">{{ record.schedule.teacher.user.get_full_name }}</td>
+                    <td class="px-6 py-4 text-center">
+                        {% if record.status == 'Present' %}
+                            <span class="inline-block px-3 py-1 bg-emerald-100 text-emerald-800 rounded-full font-semibold text-xs border border-emerald-200 shadow-sm">حاضر</span>
+                        {% else %}
+                            <span class="inline-block px-3 py-1 bg-red-100 text-red-800 rounded-full font-semibold text-xs border border-red-200 shadow-sm">غائب</span>
+                        {% endif %}
+                    </td>
+                    <td class="px-6 py-4 text-gray-500 text-xs">{{ record.notes|default:'-' }}</td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="7" class="px-6 py-12 text-center text-gray-500">
+                        <svg class="w-12 h-12 mx-auto text-gray-300 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                        لا توجد سجلات حضور أو غياب مسجلة لك حتى الآن.
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

@@ -47,7 +47,7 @@ def admin_add_teacher(request):
         if form.is_valid():
             form.save()
             messages.success(request, 'تمت إضافة المعلم بنجاح.')
-            return redirect('admin_dashboard')
+            return redirect(request.path_info)
     else:
         form = TeacherCreationForm()
         
@@ -209,7 +209,7 @@ def admin_add_student(request):
         if form.is_valid():
             form.save()
             messages.success(request, 'تمت إضافة الطالب بنجاح.')
-            return redirect('admin_dashboard')
+            return redirect(request.path_info)
     else:
         form = StudentCreationForm()
         
@@ -256,12 +256,25 @@ def teacher_dashboard(request):
         teacher=teacher_profile,
         day_of_week=today_name
     ).select_related('section', 'subject', 'section__grade').order_by('period')
+
+    # Convert English day name to Arabic for presentation
+    arabic_days = {
+        'Monday': 'الاثنين',
+        'Tuesday': 'الثلاثاء',
+        'Wednesday': 'الأربعاء',
+        'Thursday': 'الخميس',
+        'Friday': 'الجمعة',
+        'Saturday': 'السبت',
+        'Sunday': 'الأحد'
+    }
+    today_arabic = arabic_days.get(today_name, today_name)
     
     context = {
         'sections_count': sections_count,
         'students_count': students_count,
         'pending_assignments_count': pending_assignments_count,
         'today_schedules': today_schedules,
+        'today_arabic': today_arabic,
     }
     
     return render(request, 'school/teacher/dashboard.html', context)
@@ -666,17 +679,30 @@ def student_dashboard(request):
     today_schedules = []
     if section:
         today_schedules = Schedule.objects.filter(section=section, day_of_week=today_name).select_related('subject', 'teacher__user').order_by('period')
-    
+
+    # Convert English day name to Arabic for presentation
+    arabic_days = {
+        'Monday': 'الاثنين',
+        'Tuesday': 'الثلاثاء',
+        'Wednesday': 'الأربعاء',
+        'Thursday': 'الخميس',
+        'Friday': 'الجمعة',
+        'Saturday': 'السبت',
+        'Sunday': 'الأحد'
+    }
+    today_arabic = arabic_days.get(today_name, today_name)
+
     context = {
         'student_profile': student_profile,
         'attendance_rate': attendance_rate,
         'grades_count': grades_count,
         'recent_grades': recent_grades,
         'today_schedules': today_schedules,
+        'today_arabic': today_arabic,
     }
     return render(request, 'school/student/dashboard.html', context)
 @login_required
-def admin_add_generic(request, form_class, model_class, template_name, success_message, title, edit_url_name=None):
+def admin_add_generic(request, form_class, model_class, template_name, success_message, title, edit_url_name=None, delete_url_name=None):
     if request.user.role != 'Admin' and not request.user.is_superuser:
         return redirect('dashboard_redirect')
         
@@ -695,7 +721,8 @@ def admin_add_generic(request, form_class, model_class, template_name, success_m
         'form': form, 
         'title': title, 
         'items': existing_items,
-        'edit_url_name': edit_url_name
+        'edit_url_name': edit_url_name,
+        'delete_url_name': delete_url_name
     })
 
 @login_required
@@ -722,32 +749,53 @@ def admin_edit_generic(request, pk, form_class, model_class, template_name, succ
         # but we could if we wanted. For now, simple edit form.
     })
 
+@login_required
+def admin_delete_generic(request, pk, model_class, success_message, redirect_url_name):
+    if request.user.role != 'Admin' and not request.user.is_superuser:
+        return redirect('dashboard_redirect')
+    
+    item = get_object_or_404(model_class, pk=pk)
+    if request.method == 'POST':
+        item.delete()
+        messages.success(request, success_message)
+    return redirect(redirect_url_name)
+
 from .forms.admin_forms import GradeForm, SectionForm, SubjectForm, ScheduleForm
 from .models import Grade, Section, Subject, Schedule
 
 @login_required
 def admin_add_grade(request):
-    return admin_add_generic(request, GradeForm, Grade, 'school/admin/add_generic.html', 'تمت إضافة الصف بنجاح.', 'إضافة صف جديد', 'admin_edit_grade')
+    messages.error(request, "غير مسموح بإنشاء صفوف جديدة. تم إضافة الصفوف الدراسية الأساسية مسبقاً بالنظام.")
+    return redirect('admin_dashboard')
 
 @login_required
 def admin_edit_grade(request, pk):
-    return admin_edit_generic(request, pk, GradeForm, Grade, 'school/admin/add_generic.html', 'تم تعديل الصف بنجاح.', 'تعديل صف', 'admin_add_grade')
+    messages.error(request, "غير مسموح بتعديل الصفوف الأساسية.")
+    return redirect('admin_dashboard')
 
 @login_required
 def admin_add_section(request):
-    return admin_add_generic(request, SectionForm, Section, 'school/admin/add_generic.html', 'تمت إضافة الشعبة بنجاح.', 'إضافة شعبة/فصل جديد', 'admin_edit_section')
+    return admin_add_generic(request, SectionForm, Section, 'school/admin/add_generic.html', 'تمت إضافة الشعبة بنجاح.', 'إضافة شعبة/فصل جديد', 'admin_edit_section', 'admin_delete_section')
 
 @login_required
 def admin_edit_section(request, pk):
-    return admin_edit_generic(request, pk, SectionForm, Section, 'school/admin/add_generic.html', 'تم تعديل الشعبة بنجاح.', 'تعديل شعبة', 'admin_add_section')
+    return admin_edit_generic(request, pk, SectionForm, Section, 'school/admin/add_generic.html', 'تم تعديل الشعبة بنجاح.', 'تعديل شعبة', 'admin_add_section', 'admin_delete_section')
+
+@login_required
+def admin_delete_section(request, pk):
+    return admin_delete_generic(request, pk, Section, 'تم حذف الشعبة بنجاح.', 'admin_add_section')
 
 @login_required
 def admin_add_subject(request):
-    return admin_add_generic(request, SubjectForm, Subject, 'school/admin/add_generic.html', 'تمت إضافة المادة بنجاح.', 'إضافة مادة دراسية', 'admin_edit_subject')
+    return admin_add_generic(request, SubjectForm, Subject, 'school/admin/add_generic.html', 'تمت إضافة المادة بنجاح.', 'إضافة مادة دراسية', 'admin_edit_subject', 'admin_delete_subject')
 
 @login_required
 def admin_edit_subject(request, pk):
     return admin_edit_generic(request, pk, SubjectForm, Subject, 'school/admin/add_generic.html', 'تم تعديل المادة بنجاح.', 'تعديل مادة', 'admin_add_subject')
+
+@login_required
+def admin_delete_subject(request, pk):
+    return admin_delete_generic(request, pk, Subject, 'تم حذف المادة بنجاح.', 'admin_add_subject')
 
 @login_required
 def admin_add_schedule(request):
@@ -873,4 +921,280 @@ def student_grades(request):
         'grades': grades,
     }
     return render(request, 'school/student/grades.html', context)
+
+@login_required
+def student_schedule(request):
+    if request.user.role != 'Student':
+         return redirect('dashboard_redirect')
+
+    try:
+        student_profile = request.user.student_profile
+        section = student_profile.section
+        
+        if not section:
+            # If student has no section assigned yet
+            messages.warning(request, "لم يتم تعيينك في أي شعبة بعد.")
+            context = {
+                'days_data': [],
+                'periods': [],
+                'section': None
+            }
+            return render(request, 'school/student/schedule.html', context)
+            
+    except StudentProfile.DoesNotExist:
+        return redirect('login')
+
+    # Get all schedule items for the student's section
+    schedules = Schedule.objects.filter(section=section).select_related('subject', 'teacher__user')
+
+    # Create a lookup dictionary: (day_name_en, period_number) -> schedule_obj
+    schedule_dict = {}
+    for sch in schedules:
+        schedule_dict[(sch.day_of_week, sch.period)] = sch
+
+    # Define days and periods structure
+    days_map = [
+        ('Sunday', 'الأحد'),
+        ('Monday', 'الاثنين'),
+        ('Tuesday', 'الثلاثاء'),
+        ('Wednesday', 'الأربعاء'),
+        ('Thursday', 'الخميس'),
+    ]
+    periods = range(1, 8) # Show periods 1 through 7
+
+    days_data = []
+    
+    for day_en, day_ar in days_map:
+        day_periods = []
+        for p in periods:
+            # Get schedule for this day/period, or None
+            sch = schedule_dict.get((day_en, p))
+            day_periods.append(sch)
+            
+        days_data.append({
+            'day_name': day_ar,
+            'periods': day_periods
+        })
+
+    context = {
+        'days_data': days_data,
+        'periods': periods,
+        'section': section,
+    }
+    return render(request, 'school/student/schedule.html', context)
+
+@login_required
+def student_attendance(request):
+    if request.user.role != 'Student':
+         return redirect('dashboard_redirect')
+         
+    try:
+        student_profile = request.user.student_profile
+    except StudentProfile.DoesNotExist:
+        return redirect('login')
+        
+    from .models import Attendance
+    
+    # جلب جميع سجلات الحضور الخاصة بالطالب مرتبة من الأحدث للأقدم
+    attendances = Attendance.objects.filter(student=student_profile).select_related('schedule__subject', 'schedule__teacher__user').order_by('-date', '-schedule__period')
+    
+    # حساب الإحصائيات
+    total_records = attendances.count()
+    total_present = attendances.filter(status='Present').count()
+    total_absent = attendances.filter(status='Absent').count()
+    
+    attendance_percentage = 0
+    if total_records > 0:
+        attendance_percentage = round((total_present / total_records) * 100, 1)
+        
+    context = {
+        'attendances': attendances,
+        'total_present': total_present,
+        'total_absent': total_absent,
+        'attendance_percentage': attendance_percentage,
+    }
+    return render(request, 'school/student/attendance.html', context)
+
+@login_required
+def teacher_resources(request):
+    if request.user.role != 'Teacher':
+        return redirect('dashboard_redirect')
+        
+    try:
+        teacher_profile = request.user.teacher_profile
+    except TeacherProfile.DoesNotExist:
+        return redirect('login')
+        
+    # Get subjects and sections assigned to this teacher via Schedule
+    schedules = Schedule.objects.filter(teacher=teacher_profile).select_related('subject', 'section', 'section__grade')
+    
+    # We want unique subjects and unique sections for the drop-downs
+    subjects_dict = {}
+    sections_dict = {}
+    for sch in schedules:
+        subjects_dict[sch.subject.id] = sch.subject
+        sections_dict[sch.section.id] = sch.section
+        
+    subjects = list(subjects_dict.values())
+    sections = list(sections_dict.values())
+    
+    from .models import Resource
+    
+    # Handle object creation
+    if request.method == 'POST':
+        title = request.POST.get('title')
+        subject_id = request.POST.get('subject_id')
+        section_id = request.POST.get('section_id')
+        uploaded_file = request.FILES.get('file')
+        
+        if title and subject_id and section_id and uploaded_file:
+            subject = get_object_or_404(Subject, id=subject_id)
+            section = get_object_or_404(Section, id=section_id)
+            
+            Resource.objects.create(
+                title=title,
+                file=uploaded_file,
+                subject=subject,
+                section=section,
+                teacher=teacher_profile
+            )
+            messages.success(request, 'تم رفع الملف بنجاح.')
+            return redirect('teacher_resources')
+        else:
+            messages.error(request, 'الرجاء تعبئة جميع الحقول وإرفاق ملف.')
+            
+    # Get all resources uploaded by this teacher
+    resources = Resource.objects.filter(teacher=teacher_profile).order_by('-uploaded_at')
+    
+    context = {
+        'subjects': subjects,
+        'sections': sections,
+        'resources': resources,
+    }
+    return render(request, 'school/teacher/resources.html', context)
+
+@login_required
+@require_POST
+def teacher_delete_resource(request, resource_id):
+    if request.user.role != 'Teacher':
+        return redirect('dashboard_redirect')
+        
+    from .models import Resource
+    resource = get_object_or_404(Resource, id=resource_id, teacher__user=request.user)
+    resource.file.delete(save=False) # Delete file from disk
+    resource.delete()
+    messages.success(request, 'تم حذف الملف بنجاح.')
+        
+    return redirect('teacher_resources')
+
+@login_required
+def student_resources(request):
+    if request.user.role != 'Student':
+         return redirect('dashboard_redirect')
+         
+    try:
+        student_profile = request.user.student_profile
+        section = student_profile.section
+    except StudentProfile.DoesNotExist:
+        return redirect('login')
+        
+    from .models import Resource
+    
+    if section:
+        resources = Resource.objects.filter(section=section).select_related('subject', 'teacher__user').order_by('-uploaded_at')
+    else:
+        resources = []
+        
+    context = {
+        'resources': resources,
+        'section': section,
+    }
+    return render(request, 'school/student/resources.html', context)
+
+@login_required
+def teacher_feedbacks(request):
+    if request.user.role != 'Teacher':
+        return redirect('dashboard_redirect')
+        
+    try:
+        teacher_profile = request.user.teacher_profile
+    except TeacherProfile.DoesNotExist:
+        return redirect('login')
+        
+    # جلب الشعب التي يدرسها المعلم
+    schedules = Schedule.objects.filter(teacher=teacher_profile).select_related('section', 'section__grade')
+    sections_dict = {}
+    for sch in schedules:
+        if sch.section:
+            sections_dict[sch.section.id] = sch.section
+    sections = list(sections_dict.values())
+    
+    from .models import Feedback
+    
+    # حفظ رسالة جديدة
+    if request.method == 'POST':
+        student_id = request.POST.get('student_id')
+        section_id = request.POST.get('section_id')
+        message = request.POST.get('message')
+        if student_id and message:
+            if student_id == 'all' and section_id:
+                students = StudentProfile.objects.filter(section_id=section_id)
+                feedbacks_to_create = [
+                    Feedback(teacher=teacher_profile, student=student, message=message)
+                    for student in students
+                ]
+                if feedbacks_to_create:
+                    Feedback.objects.bulk_create(feedbacks_to_create)
+                messages.success(request, f'تم إرسال الملاحظة لجميع طلاب الشعبة بنجاح ({students.count()} طالب).')
+            else:
+                student = get_object_or_404(StudentProfile, id=student_id)
+                Feedback.objects.create(teacher=teacher_profile, student=student, message=message)
+                messages.success(request, 'تم إرسال الملاحظة للطالب بنجاح.')
+            return redirect('teacher_feedbacks')
+        else:
+            messages.error(request, 'الرجاء اختيار الطالب وكتابة الملاحظة.')
+            
+    # جلب جميع الملاحظات المرسلة مسبقاً مع نظام الترقيم (Pagination)
+    from django.core.paginator import Paginator
+    all_feedbacks = Feedback.objects.filter(teacher=teacher_profile).select_related('student__user', 'student__section__grade').order_by('-created_at')
+    paginator = Paginator(all_feedbacks, 6) # عرض 6 ملاحظات في كل صفحة
+    page_number = request.GET.get('page')
+    feedbacks = paginator.get_page(page_number)
+    
+    context = {
+        'sections': sections,
+        'feedbacks': feedbacks,
+    }
+    return render(request, 'school/teacher/feedbacks.html', context)
+
+@login_required
+def load_students_for_feedback(request):
+    """ نقطة نهاية لـ HTMX لجلب الطلاب عند اختيار شعبة معينة """
+    section_id = request.GET.get('section_id')
+    html = '<option value="" disabled selected>-- اختر الطالب --</option>'
+    if section_id:
+        html += '<option value="all" class="font-bold text-indigo-600">-- الكل (جميع طلاب الشعبة) --</option>'
+        students = StudentProfile.objects.filter(section_id=section_id).select_related('user')
+        for student in students:
+            name = student.user.get_full_name() or student.user.username
+            html += f'<option value="{student.id}">{name}</option>'
+    return HttpResponse(html)
+
+@login_required
+def student_feedbacks(request):
+    if request.user.role != 'Student':
+         return redirect('dashboard_redirect')
+         
+    try:
+        student_profile = request.user.student_profile
+    except StudentProfile.DoesNotExist:
+        return redirect('login')
+        
+    from .models import Feedback
+    feedbacks = Feedback.objects.filter(student=student_profile).select_related('teacher__user').prefetch_related('teacher__subjects').order_by('-created_at')
+    
+    context = {
+        'feedbacks': feedbacks,
+    }
+    return render(request, 'school/student/feedbacks.html', context)
 

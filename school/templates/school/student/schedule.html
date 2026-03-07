@@ -1,0 +1,60 @@
+{% extends 'base.html' %}
+
+{% block title %}الجدول الدراسي{% endblock %}
+
+{% block content %}
+<div class="mb-6">
+    <h1 class="text-3xl font-bold text-gray-800">الجدول الدراسي</h1>
+    <p class="text-gray-600 mt-2">
+        {% if section %}
+        جدول الحصص لشعبتك: <span class="font-bold text-indigo-600">{{ section.grade.name }} - {{ section.name }}</span>
+        {% else %}
+        الجدول الدراسي
+        {% endif %}
+    </p>
+</div>
+
+{% if days_data %}
+<div class="bg-white rounded-xl shadow overflow-hidden w-full max-w-full">
+    <div class="w-full max-w-full overflow-x-auto">
+        <table class="w-full text-center border-collapse min-w-[800px] table-auto">
+            <thead>
+                <tr class="bg-indigo-600 text-white">
+                    <th class="p-4 border border-indigo-700 w-32 sticky right-0 z-10 bg-indigo-600">اليوم / الحصة</th>
+                    {% for p in periods %}
+                    <th class="p-4 border border-indigo-700 w-32">الحصة {{ p }}</th>
+                    {% endfor %}
+                </tr>
+            </thead>
+            <tbody>
+                {% for day in days_data %}
+                <tr class="hover:bg-indigo-50 transition-colors">
+                    <td class="p-4 border border-gray-200 font-bold bg-gray-50 text-gray-700 sticky right-0 z-10">{{ day.day_name }}</td>
+                    {% for schedule in day.periods %}
+                    <td class="p-3 border border-gray-200 h-28 align-top">
+                        {% if schedule %}
+                        <div class="bg-white p-3 rounded-lg shadow-sm border border-indigo-100 h-full flex flex-col justify-center items-center gap-1 hover:shadow-md transition-shadow group">
+                            <div class="font-bold text-indigo-900 group-hover:text-indigo-700">{{ schedule.subject.name }}</div>
+                            <div class="text-xs font-semibold text-gray-500 bg-gray-100 px-2 py-0.5 rounded-full">{{ schedule.teacher.user.get_full_name }}</div>
+                        </div>
+                        {% else %}
+                        <div class="h-full flex items-center justify-center">
+                            <span class="text-gray-300 text-2xl font-light">-</span>
+                        </div>
+                        {% endif %}
+                    </td>
+                    {% endfor %}
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% else %}
+<div class="bg-white rounded-xl shadow p-12 text-center text-gray-500 border border-dashed border-gray-300">
+    <svg class="w-16 h-16 mx-auto text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+    <h3 class="text-lg font-medium text-gray-900 mb-2">لا يوجد جدول دراسي</h3>
+    <p>لم يتم العثور على جدول دراسي لهذه الشعبة بعد.</p>
+</div>
+{% endif %}
+{% endblock %}

@@ -8,13 +8,17 @@ class CustomUser(AbstractUser):
         ('Student', 'طالب'),
     )
     role = models.CharField(max_length=20, choices=ROLE_CHOICES, default='Student', verbose_name="الصلاحية")
-    enrollment_number = models.CharField(max_length=50, unique=True, null=True, blank=True, verbose_name="رقم القيد")
+    enrollment_number = models.CharField(max_length=50, unique=True, null=True, blank=True, verbose_name="رقم القيد", error_messages={'unique': 'رقم القيد هذا مستخدم بالفعل في النظام.'})
 
     def __str__(self):
         return f"{self.get_full_name() or self.username} ({self.get_role_display()})"
 
 class Grade(models.Model):
-    name = models.CharField(max_length=50, unique=True, verbose_name="اسم الصف (مثال: الأول)")
+    name = models.CharField(max_length=50, unique=True, verbose_name="اسم الصف (مثال: الأول)", error_messages={'unique': 'هذا الصف موجود بالفعل.'})
+    level = models.IntegerField(default=0, verbose_name="الترتيب الأكاديمي")
+
+    class Meta:
+        ordering = ['level']
 
     def __str__(self):
         return self.name
@@ -23,11 +27,15 @@ class Section(models.Model):
     grade = models.ForeignKey(Grade, on_delete=models.CASCADE, related_name='sections', verbose_name="الصف")
     name = models.CharField(max_length=50, verbose_name="الشعبة (مثال: أ، ب)")
 
+    class Meta:
+        ordering = ['grade__level', 'name']
+        unique_together = ['grade', 'name']
+
     def __str__(self):
-        return f"الصف {self.grade.name} - شعبة {self.name}"
+        return f"{self.grade.name} - شعبة {self.name}"
 
 class Subject(models.Model):
-    name = models.CharField(max_length=100, unique=True, verbose_name="اسم المادة")
+    name = models.CharField(max_length=100, unique=True, verbose_name="اسم المادة", error_messages={'unique': 'اسم هذه المادة موجود بالفعل.'})
 
     def __str__(self):
         return self.name

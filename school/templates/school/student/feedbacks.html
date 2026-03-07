@@ -1,0 +1,57 @@
+{% extends 'base.html' %}
+
+{% block title %}الملاحظات والتوجيهات من المعلمين{% endblock %}
+
+{% block content %}
+<div class="mb-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
+    <div>
+        <h1 class="text-3xl font-bold text-gray-800">صندوق الملاحظات والتوجيهات</h1>
+        <p class="text-gray-600 mt-2">يعرض هذا السجل التوجيهات أو الملاحظات التي تم إرسالها لك من قبل معلميك.</p>
+    </div>
+</div>
+
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-8">
+    {% for feedback in feedbacks %}
+    <div class="bg-white rounded-xl shadow-lg p-6 border-r-4 border-emerald-500 hover:-translate-y-1 transition duration-300">
+        <div class="flex items-center justify-between mb-4 border-b border-gray-100 pb-3">
+            <div class="flex items-center gap-3">
+                <div class="w-12 h-12 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-700 font-bold border border-emerald-200">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
+                </div>
+                <div>
+                    <h4 class="font-bold text-gray-900 leading-tight">{{ feedback.teacher.user.get_full_name }}</h4>
+                    <span class="text-xs text-gray-500">
+                        معلم 
+                        {% for subject in feedback.teacher.subjects.all %}
+                            {{ subject.name }}{% if not forloop.last %} - {% endif %}
+                        {% empty %}
+                            المادة
+                        {% endfor %}
+                    </span>
+                </div>
+            </div>
+            <span class="text-emerald-500 bg-emerald-50 px-3 py-1 rounded-full text-xs font-semibold border border-emerald-100">
+                ملاحظة
+            </span>
+        </div>
+        <div class="text-gray-700 text-sm mb-5 leading-relaxed bg-gray-50 p-4 rounded-lg border border-gray-100" style="position: relative;">
+            <div class="relative z-10 font-medium">
+                {{ feedback.message }}
+            </div>
+        </div>
+        <div class="text-left text-xs text-gray-400 font-mono mt-auto pt-2 border-t border-gray-50 flex items-center gap-1 justify-end">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+            <span dir="ltr">{{ feedback.created_at|date:"Y-m-d h:i A" }}</span>
+        </div>
+    </div>
+    {% empty %}
+    <div class="col-span-full py-16 text-center text-gray-500 bg-white rounded-xl shadow border border-dashed border-gray-300 transition-all hover:bg-gray-50">
+        <div class="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-5">
+            <svg class="w-10 h-10 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 19v-8.93a2 2 0 01.89-1.664l7-4.666a2 2 0 012.22 0l7 4.666A2 2 0 0121 10.07V19M3 19a2 2 0 002 2h14a2 2 0 002-2M3 19l6.75-4.5M21 19l-6.75-4.5M3 10l6.75 4.5M21 10l-6.75 4.5m0 0l-1.14.76a2 2 0 01-2.22 0l-1.14-.76"></path></svg>
+        </div>
+        <h3 class="text-xl font-medium text-gray-900 mb-2">صندوق الملاحظات فارغ</h3>
+        <p class="text-gray-500 max-w-sm mx-auto">لم تتلقَ أي توجيهات أو ملاحظات من معلميك حتى الآن.</p>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}

@@ -42,16 +42,22 @@
                 {% if user.is_authenticated %}
                     {% if user.role == 'Admin' or user.is_superuser %}
                         <a href="{% url 'admin_dashboard' %}" class="block px-4 py-2 mt-2 text-sm font-semibold rounded-lg hover:bg-indigo-600">لوحة الإدارة</a>
-                        <a href="/admin/" target="_blank" class="block px-4 py-2 mt-2 text-sm font-semibold rounded-lg hover:bg-indigo-600">قاعدة البيانات (Django Admin)</a>
+                        <a href="/admin/" target="_blank" class="block px-4 py-2 mt-2 text-sm font-semibold rounded-lg hover:bg-indigo-600">لوحة تحكم قاعدة البيانات</a>
                     {% elif user.role == 'Teacher' %}
                         <a href="{% url 'teacher_dashboard' %}" class="block px-4 py-2 mt-2 text-sm font-semibold rounded-lg hover:bg-indigo-600">لوحة المعلم</a>
                         <a href="{% url 'teacher_schedule' %}" class="block px-4 py-2 mt-2 text-sm font-semibold rounded-lg hover:bg-indigo-600">الجدول الدراسي</a>
                         <a href="{% url 'teacher_students_list' %}" class="block px-4 py-2 mt-2 text-sm font-semibold rounded-lg hover:bg-indigo-600">قائمة الطلاب</a>
                         <a href="{% url 'teacher_attendance' %}" class="block px-4 py-2 mt-2 text-sm font-semibold rounded-lg hover:bg-indigo-600">سجل الحضور</a>
                         <a href="{% url 'teacher_grading' %}" class="block px-4 py-2 mt-2 text-sm font-semibold rounded-lg hover:bg-indigo-600">الدرجات وتقييمات</a>
+                        <a href="{% url 'teacher_resources' %}" class="block px-4 py-2 mt-2 text-sm font-semibold rounded-lg hover:bg-indigo-600">المصادر التعليمية</a>
+                        <a href="{% url 'teacher_feedbacks' %}" class="block px-4 py-2 mt-2 text-sm font-semibold rounded-lg hover:bg-indigo-600">الملاحظات والتوجيهات</a>
                     {% elif user.role == 'Student' %}
                         <a href="{% url 'student_dashboard' %}" class="block px-4 py-2 mt-2 text-sm font-semibold rounded-lg hover:bg-indigo-600">لوحة الطالب</a>
+                        <a href="{% url 'student_schedule' %}" class="block px-4 py-2 mt-2 text-sm font-semibold rounded-lg hover:bg-indigo-600">الجدول الدراسي</a>
+                        <a href="{% url 'student_attendance' %}" class="block px-4 py-2 mt-2 text-sm font-semibold rounded-lg hover:bg-indigo-600">سجل الحضور والغياب</a>
                         <a href="{% url 'student_grades' %}" class="block px-4 py-2 mt-2 text-sm font-semibold rounded-lg hover:bg-indigo-600">درجاتي</a>
+                        <a href="{% url 'student_resources' %}" class="block px-4 py-2 mt-2 text-sm font-semibold rounded-lg hover:bg-indigo-600">المصادر التعليمية</a>
+                        <a href="{% url 'student_feedbacks' %}" class="block px-4 py-2 mt-2 text-sm font-semibold rounded-lg hover:bg-indigo-600">صندوق الملاحظات</a>
                     {% endif %}
                 {% endif %}
             </nav>
@@ -102,8 +108,15 @@
             <main class="flex-1 overflow-x-hidden overflow-y-auto bg-gray-50 p-6">
                 {% if messages %}
                     {% for message in messages %}
-                        <div class="mb-4 px-4 py-3 rounded-lg text-white {% if message.tags == 'error' %}bg-red-500{% elif message.tags == 'success' %}bg-green-500{% else %}bg-blue-500{% endif %}">
-                            {{ message }}
+                        <div x-data="{ show: true }" 
+                             x-show="show" 
+                             x-init="setTimeout(() => show = false, 5000)" 
+                             x-transition.duration.500ms
+                             class="mb-4 px-4 py-3 rounded-lg text-white shadow-sm flex items-center justify-between {% if message.tags == 'error' %}bg-red-500{% elif message.tags == 'success' %}bg-green-500{% else %}bg-blue-500{% endif %}">
+                            <span>{{ message }}</span>
+                            <button @click="show = false" class="text-white hover:text-gray-200 focus:outline-none">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                            </button>
                         </div>
                     {% endfor %}
                 {% endif %}

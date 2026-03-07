@@ -4,7 +4,7 @@
 
 {% block content %}
 <div class="mb-6">
-    <h1 class="text-3xl font-bold text-gray-800">لوحة تحكم النظام (Admin)</h1>
+    <h1 class="text-3xl font-bold text-gray-800">لوحة التحكم للإدارة</h1>
     <p class="text-gray-600 mt-2">مرحباً بك أستاذ {{ user.username }}. من هنا يمكنك إدارة النظام بشكل كامل.</p>
 </div>
 
@@ -46,10 +46,8 @@
 <!-- أزرار الإجراءات السريعة للمنظومة -->
 <div class="bg-white rounded-xl shadow p-6 mb-8">
     <h2 class="text-xl font-bold text-gray-800 mb-4">إدارة المنظومة الأكاديمية</h2>
+    <p class="text-sm text-gray-500 mb-4">تلميح: تم توفير الصفوف الدراسية الأساسية مسبقاً (من الأول الابتدائي وحتى الثالث الثانوي)، يمكنك البدء مباشرة بإضافة الشُعب للمواد.</p>
     <div class="flex flex-wrap gap-4">
-        <a href="{% url 'admin_add_grade' %}" class="bg-purple-500 text-white px-6 py-2 rounded-lg hover:bg-purple-600 transition">
-            + إضافة صف
-        </a>
         <a href="{% url 'admin_add_section' %}" class="bg-amber-500 text-white px-6 py-2 rounded-lg hover:bg-amber-600 transition">
             + إضافة شعبة
         </a>
@@ -65,7 +63,7 @@
 <!-- إدارة قواعد البيانات العامة -->
 <div class="mt-4">
      <a href="/admin/" target="_blank" class="bg-gray-800 text-white px-6 py-2 rounded-lg hover:bg-gray-900 transition inline-block">
-            إدارة قواعد البيانات كاملة (Django Admin)
+            إدارة قواعد البيانات كاملة (لوحة تحكم جانغو)
      </a>
 </div>
 {% endblock %}

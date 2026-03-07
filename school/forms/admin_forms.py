@@ -1,6 +1,7 @@
 from django import forms
 from django.contrib.auth import get_user_model
 from django.core.validators import RegexValidator
+from django.core.exceptions import NON_FIELD_ERRORS
 from school.models import TeacherProfile, StudentProfile, Subject, Section, Grade, Schedule
 
 User = get_user_model()
@@ -204,6 +205,11 @@ class SectionForm(forms.ModelForm):
         labels = {
             'grade': 'الصف',
             'name': 'اسم الشعبة (مثال: أ, ب)'
+        }
+        error_messages = {
+            NON_FIELD_ERRORS: {
+                'unique_together': "هذه الشعبة مسجلة مسبقاً في هذا الصف.",
+            }
         }
 
 class SubjectForm(forms.ModelForm):
